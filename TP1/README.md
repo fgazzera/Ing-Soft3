@@ -5,12 +5,12 @@ En mi caso ya lo tenia instalado con la versión 2.44.0
 ![captura](imagenes/1.png)
 
 #### 2- Crear un repositorio local y agregar archivos
-  - Crear un repositorio local en un nuevo directorio.
+  - Crear un repositorio local en un nuevo directorio
   ![captura](imagenes/2.png)
-  - Agregar un archivo Readme.md, agregar algunas líneas con texto a dicho archivo.
+  - Agregar un archivo Readme.md, agregar algunas líneas con texto a dicho archivo
   ![captura](imagenes/3.png)
   ![captura](imagenes/4.png)
-  - Crear un commit y proveer un mensaje descriptivo.
+  - Crear un commit y proveer un mensaje descriptivo
   ![captura](imagenes/5.png)
 
 #### 3- Configuración del Editor Predeterminado
@@ -25,46 +25,46 @@ En mi caso ya lo tenia instalado con la versión 2.44.0
    
 #### 4- Creación de Repos 01 -> Crearlo en GitHub, clonarlo localmente y subir cambios
   - Crear una cuenta en https://github.com
-  - Crear un nuevo repositorio en dicha página con el Readme.md por defecto.
+  - Crear un nuevo repositorio en dicha página con el Readme.md por defecto
     ![captura](imagenes/7.png)
   - Clonar el repo remoto en un nuevo directorio local
-    Debemos copiar el URL del nuevo repositorio para clonarlo en el directorio local.
+    Debemos copiar el URL del nuevo repositorio para clonarlo en el directorio local
     ![captura](imagenes/8.png)
     Para clonarlo al directorio local usamos:
     ```sh
     git clone https://github.com/fgazzera/Repo1_tp1.git
     ```
     ![captura](imagenes/9.png)
-  - Editar archivo Readme.md agregando algunas lineas de texto.
+  - Editar archivo Readme.md agregando algunas lineas de texto
     ![captura](imagenes/10.png)
-  - Editar (o crear si no existe) el archivo .gitignore agregando los archivos *.bak.
+  - Editar (o crear si no existe) el archivo .gitignore agregando los archivos *.bak
     ![captura](imagenes/11.png)
     ![captura](imagenes/12.png)
-  - Crear un commit con un mensaje descriptivo. Luego Intentar hacer un push al repo remoto.
+  - Crear un commit con un mensaje descriptivo. Luego Intentar hacer un push al repo remoto
     ![captura](imagenes/13.png)
 
 #### 5- Creación de Repos 02-> Crearlo localmente y subirlo a GitHub
-  - Crear un repo local.
+  - Crear un repo local
     ![captura](imagenes/14.png)
-  - Agregar archivo Readme.md con algunas lineas de texto.
+  - Agregar archivo Readme.md con algunas lineas de texto
     ![captura](imagenes/15.png)
-  - Crear repo remoto en GitHub.
+  - Crear repo remoto en GitHub
     ![captura](imagenes/16.png)
-  - Asociar repo local con remoto.
+  - Asociar repo local con remoto
     ![captura](imagenes/17.png)
-  - Crear archivo .gitignore.
+  - Crear archivo .gitignore
     ![captura](imagenes/18.png)
-  - Crear un commit y proveer un mensaje descriptivo y subir cambios.
+  - Crear un commit y proveer un mensaje descriptivo y subir cambios
     ![captura](imagenes/19.png)
 
 #### 6- Ramas
-  - Crear una nueva rama.
+  - Crear una nueva rama
     ![captura](imagenes/20.png)
-  - Cambiarse a esa rama.
+  - Cambiarse a esa rama
     ![captura](imagenes/21.png)
-  - Hacer un cambio en el archivo Readme.md y hacer commit.
+  - Hacer un cambio en el archivo Readme.md y hacer commit
     ![captura](imagenes/22.png)
-  - Revisar la diferencia entre ramas.
+  - Revisar la diferencia entre ramas
     ![captura](imagenes/23.png)
 
 #### 7- Merges
