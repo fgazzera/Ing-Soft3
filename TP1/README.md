@@ -14,7 +14,8 @@ En mi caso ya lo tenia instalado con la versión 2.44.0
   ![alt text](imagenes/5.png)
 
 #### 3- Configuración del Editor Predeterminado
- - Instalar Notepad ++ para Windows o TextMate para Mac OS, colocarle un alias y configurarlo como editor predeterminado
+ - Instalar Notepad ++ para Windows o TextMate para Mac OS, colocarle un alias y configurarlo como editor predeterminado.
+ 
     En mi caso instale Notepad++, pero voy a definir a Visual Code como editor predeterminado ya que es el que uso.
    ![alt text](imagenes/6.png)
 - Para Visual Code:
