@@ -2,22 +2,22 @@
 
 #### 1- Instalar Git
 En mi caso ya lo tenia instalado con la versión 2.44.0
-![alt text](imagenes/1.png)
+![captura](imagenes/1.png)
 
 #### 2- Crear un repositorio local y agregar archivos
   - Crear un repositorio local en un nuevo directorio.
-  ![alt text](imagenes/2.png)
+  ![captura](imagenes/2.png)
   - Agregar un archivo Readme.md, agregar algunas líneas con texto a dicho archivo.
-  ![alt text](imagenes/3.png)
-  ![alt text](imagenes/4.png)
+  ![captura](imagenes/3.png)
+  ![captura](imagenes/4.png)
   - Crear un commit y proveer un mensaje descriptivo.
-  ![alt text](imagenes/5.png)
+  ![captura](imagenes/5.png)
 
 #### 3- Configuración del Editor Predeterminado
  - Instalar Notepad ++ para Windows o TextMate para Mac OS, colocarle un alias y configurarlo como editor predeterminado.
- 
+
     En mi caso instale Notepad++, pero voy a definir a Visual Code como editor predeterminado ya que es el que uso.
-   ![alt text](imagenes/6.png)
+   ![captura](imagenes/6.png)
 - Para Visual Code:
     ```sh
     git config --global core.editor "code --wait"
@@ -26,40 +26,50 @@ En mi caso ya lo tenia instalado con la versión 2.44.0
 #### 4- Creación de Repos 01 -> Crearlo en GitHub, clonarlo localmente y subir cambios
   - Crear una cuenta en https://github.com
   - Crear un nuevo repositorio en dicha página con el Readme.md por defecto
-    ![alt text](imagenes/7.png)
+    ![captura](imagenes/7.png)
   - Clonar el repo remoto en un nuevo directorio local
     Debemos copiar el URL del nuevo repositorio para clonarlo en el directorio local
-    ![alt text](imagenes/8.png)
+    ![captura](imagenes/8.png)
     Para clonarlo al directorio local usamos:
     ```sh
     git clone https://github.com/fgazzera/Repo1_tp1.git
     ```
-    ![alt text](imagenes/9.png)
+    ![captura](imagenes/9.png)
   - Editar archivo Readme.md agregando algunas lineas de texto
-    ![alt text](imagenes/10.png)
+    ![captura](imagenes/10.png)
   - Editar (o crear si no existe) el archivo .gitignore agregando los archivos *.bak
-    ![alt text](imagenes/11.png)
-    ![alt text](imagenes/12.png)
+    ![captura](imagenes/11.png)
+    ![captura](imagenes/12.png)
   - Crear un commit con un mensaje descriptivo. Luego Intentar hacer un push al repo remoto
-    ![alt text](imagenes/13.png)
+    ![captura](imagenes/13.png)
 
 #### 5- Creación de Repos 02-> Crearlo localmente y subirlo a GitHub
   - Crear un repo local
+    ![captura](imagenes/14.png)
   - Agregar archivo Readme.md con algunas lineas de texto
+    ![captura](imagenes/15.png)
   - Crear repo remoto en GitHub
+    ![captura](imagenes/16.png)
   - Asociar repo local con remoto
+    ![captura](imagenes/17.png)
   - Crear archivo .gitignore
-  - Crear un commit y proveer un mensaje descriptivo
-  - Subir cambios.
+    ![captura](imagenes/18.png)
+  - Crear un commit y proveer un mensaje descriptivo y subir cambios.
+    ![captura](imagenes/19.png)
 
 #### 6- Ramas
   - Crear una nueva rama
+    ![captura](imagenes/20.png)
   - Cambiarse a esa rama
+    ![captura](imagenes/21.png)
   - Hacer un cambio en el archivo Readme.md y hacer commit
+    ![captura](imagenes/22.png)
   - Revisar la diferencia entre ramas
+    ![captura](imagenes/23.png)
 
 #### 7- Merges
   - Hacer un merge FF
+  
   - Borrar la rama creada
   - Ver el log de commits
   - Repetir el ejercicio 6 para poder hacer un merge con No-FF
@@ -67,7 +77,7 @@ En mi caso ya lo tenia instalado con la versión 2.44.0
 #### 8- Resolución de Conflictos
   - Instalar alguna herramienta de comparación. Idealmente una 3-Way:
     - P4Merge https://www.perforce.com/downloads/helix-visual-client-p4v:
-![alt text](p4merge.png)
+![captura](p4merge.png)
     - Se puede omitir registración. Instalar solo opción Merge and DiffTool.
  - ByondCompare trial version https://www.scootersoftware.com/download.php
     - Configurar Tortoise/SourceTree para soportar esta herramienta.
