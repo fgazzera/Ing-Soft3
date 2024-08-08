@@ -86,15 +86,10 @@ En mi caso ya lo tenia instalado con la versión 2.44.0
   
 
 #### 8- Resolución de Conflictos
-  - Instalar alguna herramienta de comparación. Idealmente una 3-Way:
-    - P4Merge https://www.perforce.com/downloads/helix-visual-client-p4v:
-![captura](p4merge.png)
-    - Se puede omitir registración. Instalar solo opción Merge and DiffTool.
- - ByondCompare trial version https://www.scootersoftware.com/download.php
-    - Configurar Tortoise/SourceTree para soportar esta herramienta.
-    - https://www.scootersoftware.com/support.php?zz=kb_vcs
-    - https://medium.com/@robinvanderknaap/using-p4merge-with-tortoisegit-87c1714eb5e2
+  - Instalar alguna herramienta de comparación.
+    En mi caso, uso VSCode y voy a utilizar la herramienta de comparación que ya trae incluida y que ya la tengo como predeterminada.
   - Crear una nueva rama conflictBranch
+    ![captura](imagenes/30.png)
   - Realizar una modificación en la linea 1 del Readme.md desde main y commitear
   - En la conflictBranch modificar la misma línea del Readme.md y commitear
   - Ver las diferencias con git difftool main conflictBranch
