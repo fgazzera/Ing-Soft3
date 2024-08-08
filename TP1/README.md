@@ -45,31 +45,31 @@ En mi caso ya lo tenia instalado con la versión 2.44.0
 
 ### 5- Creación de Repos 02-> Crearlo localmente y subirlo a GitHub
   1. Crear un repo local
-    ![captura](imagenes/14.png)
+    - ![captura](imagenes/14.png)
   2. Agregar archivo Readme.md con algunas lineas de texto
-    ![captura](imagenes/15.png)
+    - ![captura](imagenes/15.png)
   3. Crear repo remoto en GitHub
-    ![captura](imagenes/16.png)
+    - ![captura](imagenes/16.png)
   4. Asociar repo local con remoto
-    ![captura](imagenes/17.png)
+    - ![captura](imagenes/17.png)
   5. Crear archivo .gitignore
-    ![captura](imagenes/18.png)
+    - ![captura](imagenes/18.png)
   6. Crear un commit y proveer un mensaje descriptivo y subir cambios
-    ![captura](imagenes/19.png)
+    - ![captura](imagenes/19.png)
 
 ### 6- Ramas
   1. Crear una nueva rama
-    ![captura](imagenes/20.png)
+    - ![captura](imagenes/20.png)
   2. Cambiarse a esa rama
-    ![captura](imagenes/21.png)
+    - ![captura](imagenes/21.png)
   3. Hacer un cambio en el archivo Readme.md y hacer commit
-    ![captura](imagenes/22.png)
+    - ![captura](imagenes/22.png)
   4. Revisar la diferencia entre ramas
-    ![captura](imagenes/23.png)
+    - ![captura](imagenes/23.png)
 
 ### 7- Merges
   1. Hacer un merge FF.
-    ![captura](imagenes/24.png)
+    - ![captura](imagenes/24.png)
   2. Borrar la rama creada.
   En este caso borramos la rama y verificamos que solo exita la rama "main":
     ![captura](imagenes/25.png)
@@ -91,33 +91,39 @@ En mi caso ya lo tenia instalado con la versión 2.44.0
   2. Crear una nueva rama conflictBranch
     ![captura](imagenes/30.png)
   3. Realizar una modificación en la linea 1 del Readme.md desde main y commitear
+    ![captura](imagenes/31.png)
   4. En la conflictBranch modificar la misma línea del Readme.md y commitear
+    Asi esta el README.md cuando hicimos el cambio de branch:
+    ![captura](imagenes/32.png)
+    Ahora modificamos el readme y commiteamos:
+    ![captura](imagenes/33.png)
   5. Ver las diferencias con git difftool main conflictBranch
+    ![captura](imagenes/34.png)
   6. Cambiarse a la rama main e intentar mergear con la rama conflictBranch
+    ![captura](imagenes/35.png)
   7. Resolver el conflicto con git mergetool
-  8. Agregar .orig al .gitignore
-  9. Hacer commit y push
+    ![captura](imagenes/36.png)
+  8. Agregar .orig al .gitignore y Hacer commit y push
+    ![captura](imagenes/37.png)
+    ![captura](imagenes/38.png)
+
 
 ### 9- Familiarizarse con el concepto de Pull Request
-
-  - Explicar que es un pull request.
-  - Crear un branch local y agregar cambios a dicho branch. 
-  - Subir el cambio a dicho branch y crear un pull request.
-  - Completar el proceso de revisión en github y mergear el PR al branch master.
-
+  1. Explicar que es un pull request.
+  *Un **pull request** en GitHub es una solicitud para fusionar cambios realizados en una rama de un repositorio con la rama principal. Permite a los desarrolladores proponer, revisar y discutir cambios de código antes de integrarlos, facilitando la colaboración y asegurando la calidad del proyecto.*
+  2. Crear un branch local y agregar cambios a dicho branch. 
+   ![captura](imagenes/39.png)
+  3. Subir el cambio a dicho branch y crear un pull request.
+  ![captura](imagenes/40.png)
+  ![captura](imagenes/41.png)
+  4. Completar el proceso de revisión en github y mergear el PR al branch master.
+  ![captura](imagenes/42.png)
+  ![captura](imagenes/43.png)
+  ![captura](imagenes/44.png)
+  ![captura](imagenes/45.png)
 
 ### 10- Algunos ejercicios online
   - Entrar a la página https://learngitbranching.js.org/
   - Completar los ejercicios **Introduction Sequence**
   - Opcional - Completar el resto de los ejercicios para ser un experto en Git!!!
-
-### 11- Crear Repositorio de la materia
-  - Crear un repositorio para la materia en github. Por ejemplo **ing-software-3**
-  - Subir archivo(s) .md con los resultados e imágenes de este trabajo práctico. Puede ser en una subcarpeta **trabajo-practico-01**
-
-### Referencias
-
-- https://try.github.io/
-- https://github.github.com/training-kit/downloads/es_ES/github-git-cheat-sheet.pdf
-- https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet
 
