@@ -31,7 +31,7 @@ En mi caso ya lo tenia instalado con la versión 2.44.0
     Debemos copiar el URL del nuevo repositorio para clonarlo en el directorio local
     ![captura](imagenes/8.png)
     Para clonarlo al directorio local usamos:
-    ```sh
+    ```
     git clone https://github.com/fgazzera/Repo1_tp1.git
     ```
     ![captura](imagenes/9.png)
