@@ -122,6 +122,7 @@ En mi caso ya lo tenia instalado con la versión 2.44.0
   3. Realizar una modificación en la linea 1 del Readme.md desde main y commitear
 
 ![captura](imagenes/31.png)
+ 
   4. En la conflictBranch modificar la misma línea del Readme.md y commitear.
 
   Asi esta el README.md cuando hicimos el cambio de branch:
@@ -137,6 +138,7 @@ En mi caso ya lo tenia instalado con la versión 2.44.0
     ![captura](imagenes/35.png)
   7. Resolver el conflicto con git mergetool
     ![captura](imagenes/36.png)
+  
   8. Agregar .orig al .gitignore y Hacer commit y push
     ![captura](imagenes/37.png)
     ![captura](imagenes/38.png)
