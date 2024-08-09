@@ -125,5 +125,5 @@ En mi caso ya lo tenia instalado con la versión 2.44.0
 ### 10- Algunos ejercicios online
   - Entrar a la página https://learngitbranching.js.org/
   - Completar los ejercicios **Introduction Sequence**
-  - Opcional - Completar el resto de los ejercicios para ser un experto en Git!!!
+  ![captura](imagenes/46.png)
 
