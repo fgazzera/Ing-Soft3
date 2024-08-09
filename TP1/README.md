@@ -74,6 +74,7 @@ En mi caso ya lo tenia instalado con la versión 2.44.0
 ![captura](imagenes/20.png)
 
   2. Cambiarse a esa rama
+  
 ![captura](imagenes/21.png)
 
   3. Hacer un cambio en el archivo Readme.md y hacer commit
