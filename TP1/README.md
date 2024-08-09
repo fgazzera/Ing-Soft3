@@ -98,12 +98,14 @@ En mi caso ya lo tenia instalado con la versión 2.44.0
   3. Ver el log de commits.
 
 ![captura](imagenes/26.png)
+ 
   4. Repetir el ejercicio 6 para poder hacer un merge con No-FF.
   
 ![captura](imagenes/27.png)
 ![captura](imagenes/28.png)
 
-    Anteriormente volvimos a la rama principal y luego hicimos el merge con No-FF
+    Anteriormente volvimos a la rama principal y luego hicimos el merge con No-FF:
+
     ```sh
     git merge --no-ff newFeature2
     ```
@@ -114,14 +116,21 @@ En mi caso ya lo tenia instalado con la versión 2.44.0
   1. Instalar alguna herramienta de comparación.
     En mi caso, uso VSCode y voy a utilizar la herramienta de comparación que ya trae incluida y que ya la tengo como predeterminada.
   2. Crear una nueva rama conflictBranch
-    ![captura](imagenes/30.png)
+
+![captura](imagenes/30.png)
+
   3. Realizar una modificación en la linea 1 del Readme.md desde main y commitear
-    ![captura](imagenes/31.png)
-  4. En la conflictBranch modificar la misma línea del Readme.md y commitear
-    Asi esta el README.md cuando hicimos el cambio de branch:
-    ![captura](imagenes/32.png)
-    Ahora modificamos el readme y commiteamos:
-    ![captura](imagenes/33.png)
+
+![captura](imagenes/31.png)
+  4. En la conflictBranch modificar la misma línea del Readme.md y commitear.
+
+  Asi esta el README.md cuando hicimos el cambio de branch:
+
+![captura](imagenes/32.png)
+
+  Ahora modificamos el readme y commiteamos:
+
+![captura](imagenes/33.png)
   5. Ver las diferencias con git difftool main conflictBranch
     ![captura](imagenes/34.png)
   6. Cambiarse a la rama main e intentar mergear con la rama conflictBranch
