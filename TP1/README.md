@@ -45,7 +45,8 @@ En mi caso ya lo tenia instalado con la versión 2.44.0
 
 ### 5- Creación de Repos 02-> Crearlo localmente y subirlo a GitHub
   1. Crear un repo local
-    - ![captura](imagenes/14.png)
+    - 
+    ![captura](imagenes/14.png)
   2. Agregar archivo Readme.md con algunas lineas de texto
     - ![captura](imagenes/15.png)
   3. Crear repo remoto en GitHub
