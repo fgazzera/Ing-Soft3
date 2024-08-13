@@ -30,7 +30,7 @@ docker run busybox
 ![captura](imagenes/5.png)
 
 - Explicar porque no se obtuvo ningún resultado
-Si ejecutamos el comando "docker run busybox" sin especificar ningún comando adicional, Docker intentará iniciar un contenedor usando la imagen de BusyBox y ejecutará el comando por defecto que está configurado en esa imagen, pero como no se ha especificado que se ejecute de manera interactiva, el contenedor se iniciará y se detendrá de inmediato.
+  - Si ejecutamos el comando "docker run busybox" sin especificar ningún comando adicional, Docker intentará iniciar un contenedor usando la imagen de BusyBox y ejecutará el comando por defecto que está configurado en esa imagen, pero como no se ha especificado que se ejecute de manera interactiva, el contenedor se iniciará y se detendrá de inmediato.
 
 - Especificamos algún comando a correr dentro del contenedor, ejecutar por ejemplo:
 ```bash
@@ -51,7 +51,7 @@ docker ps -a
 ![captura](imagenes/8.png)
 
 - Mostrar el resultado y explicar que se obtuvo como salida del comando anterior.
-El segundo comando muestra contenedores que han terminado. Vemos al contenedor BusyBox que terminó después de ejecutar el comando echo.
+  - El segundo comando muestra contenedores que han terminado. Vemos al contenedor BusyBox que terminó después de ejecutar el comando echo.
 
 ### 5- Ejecutando en modo interactivo
 
@@ -98,7 +98,7 @@ docker rm $(docker ps -a -q -f status=exited)
 ```bash
 docker container prune
 ```
-En mi caso utilice la ultima opcion:
+- En mi caso utilice la ultima opcion:
 ![captura](imagenes/14.png)
 
 
@@ -106,13 +106,13 @@ En mi caso utilice la ultima opcion:
 - Conceptos de DockerFile
   - Leer https://docs.docker.com/engine/reference/builder/ 
   - Describir las instrucciones
-     - FROM
-     - RUN
-     - ADD
-     - COPY
-     - EXPOSE
-     - CMD
-     - ENTRYPOINT
+     - FROM: Define la imagen base en la etapa de construccion.
+     - RUN: Ejecuta comandos de compilacion durante la construcción de la imagen.
+     - ADD: Copia archivos/directorios al contenedor.
+     - COPY: Copia archivos y directorios.
+     - EXPOSE: Describe en qué puertos escucha(utiliza) tu aplicación.
+     - CMD: Define el comando predeterminado para ejecutar al iniciar el contenedor.
+     - ENTRYPOINT: Define el comando que se ejecutará siempre como predeterminado.
 - A partir del código https://github.com/ingsoft3ucc/SimpleWebAPI crearemos una imagen.
 - Clonar repo
 - Crear imagen etiquetándola con un nombre. El punto final le indica a Docker que use el dir actual
