@@ -78,7 +78,6 @@ En mi caso ya lo tenia instalado con la versión 2.44.0
 ![captura](imagenes/21.png)
 
   3. Hacer un cambio en el archivo Readme.md y hacer commit
-
 ![captura](imagenes/22.png)
 
   4. Revisar la diferencia entre ramas
