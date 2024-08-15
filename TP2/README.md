@@ -117,30 +117,45 @@ docker container prune
 - Clonar repo
 - Crear imagen etiquetándola con un nombre. El punto final le indica a Docker que use el dir actual
 ```
-docker build -t mywebapi .
+docker build -t    .
 ```
+![captura](imagenes/15.png)
+![captura](imagenes/16.png)
+
 - Revisar Dockerfile y explicar cada línea
+![captura](imagenes/17.png)
+
 - Ver imágenes disponibles
 - Ejecutar un contenedor con nuestra imagen
+![captura](imagenes/18.png)
+
 - Subir imagen a nuestra cuenta de dockerhub
   - 7.1 Inicia sesión en Docker Hub
     - Primero, asegúrate de estar autenticado en Docker Hub desde tu terminal:
     ```bash
     docker login
     ```
+![captura](imagenes/19.png)
+
   - 7.2 Etiquetar la imagen a subir con tu nombre de usuario de Docker Hub y el nombre de la imagen. Por ejemplo:
     ```bash
     docker tag <nombre_imagen_local> <tu_usuario_dockerhub>/<nombre_imagen>:<tag>
     ```
+![captura](imagenes/20.png)
+
   - 7.3 Subir la Imagen
     - Para subir la imagen etiquetada a Docker Hub, utiliza el comando docker push:
      ```bash
      docker push <tu_usuario_dockerhub>/<nombre_imagen>:<tag>
      ```
+![captura](imagenes/21.png)
+
   - 7.4 Verificar la Subida
      ```bash
      docker pull <tu_usuario_dockerhub>/<nombre_imagen>:<tag>
      ```
+![captura](imagenes/22.png)
+
 
 ### 8- Publicando puertos
 
@@ -164,7 +179,10 @@ docker rm myapi
 ```bash
 docker run --name myapi -d -p 80:80 mywebapi
 ```
+![captura](imagenes/23.png)
+
   - Accedamos nuevamente a http://localhost/WeatherForecast y vemos que nos devuelve datos.
+![captura](imagenes/24.png)
 
 ### 9- Modificar Dockerfile para soportar bash 
 
