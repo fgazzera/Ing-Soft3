@@ -187,27 +187,33 @@ docker run --name myapi -d -p 80:80 mywebapi
 ### 9- Modificar Dockerfile para soportar bash 
 
 - Modificamos dockerfile para que entre en bash sin ejecutar automaticamente la app
-
+![captura](imagenes/25.png)
  
 ```bash
 #ENTRYPOINT ["dotnet", "SimpleWebAPI.dll"]
 CMD ["/bin/bash"]
 ```
 - Rehacemos la imagen
+![captura](imagenes/26.png)
+
 ```
 docker build -t mywebapi .
 ```
 - Corremos contenedor en modo interactivo exponiendo puerto
+![captura](imagenes/27.png)
 ```
 docker run -it --rm -p 80:80 mywebapi
 ```
 - Navegamos a http://localhost/weatherforecast
 - Vemos que no se ejecuta automaticamente
+![captura](imagenes/28.png)
 - Ejecutamos app:
+![captura](imagenes/29.png)
 ```
 dotnet SimpleWebAPI.dll
 ```
--Volvemos a navegar a http://localhost/weatherforecast
+- Volvemos a navegar a http://localhost/weatherforecast
+![captura](imagenes/30.png)
 - Salimos del contenedor
 
 
@@ -217,6 +223,7 @@ dotnet SimpleWebAPI.dll
 Hasta este punto los contenedores ejecutados no tenían contacto con el exterior, ellos corrían en su propio entorno hasta que terminaran su ejecución. Ahora veremos cómo montar un volumen dentro del contenedor para visualizar por ejemplo archivos del sistema huésped:
 
   - Ejecutar el siguiente comando, cambiar myusuario por el usuario que corresponda. En Mac puede utilizarse /Users/miusuario/temp):
+![captura](imagenes/31.png)
 ```bash
 docker run -it --rm -p 80:80 -v /Users/miuser/temp:/var/temp  mywebapi
 ```
@@ -226,9 +233,13 @@ ls -l /var/temp
 touch /var/temp/hola.txt
 ```
   - Verificar que el Archivo se ha creado en el directorio del guest y del host.
+![captura](imagenes/32.png)
+
 
 ### 11- Utilizando una base de datos
 - Levantar una base de datos PostgreSQL
+![captura](imagenes/33.png)
+![captura](imagenes/34.png)
 
 ```bash
 mkdir $HOME/.postgres
@@ -236,6 +247,7 @@ mkdir $HOME/.postgres
 docker run --name my-postgres -e POSTGRES_PASSWORD=mysecretpassword -v $HOME/.postgres:/var/lib/postgresql/data -p 5432:5432 -d postgres:9.4
 ```
 - Ejecutar sentencias utilizando esta instancia
+![captura](imagenes/35.png)
 
 ```bash
 docker exec -it my-postgres /bin/bash
@@ -243,6 +255,7 @@ docker exec -it my-postgres /bin/bash
 psql -h localhost -U postgres
 
 #Estos comandos se corren una vez conectados a la base
+![captura](imagenes/36.png)
 
 \l
 create database test;
@@ -257,6 +270,7 @@ exit
 ```
 
 - Conectarse a la base utilizando alguna IDE (Dbeaver - https://dbeaver.io/, Azure DataStudio -https://azure.microsoft.com/es-es/products/data-studio, etc). Interactuar con los objectos objectos creados.
+![captura](imagenes/37.png)
 
 - Explicar que se logro con el comando `docker run` y `docker exec` ejecutados en este ejercicio.
 
