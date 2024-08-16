@@ -273,11 +273,24 @@ exit
 ![captura](imagenes/37.png)
 
 - Explicar que se logro con el comando `docker run` y `docker exec` ejecutados en este ejercicio.
+- El comando docker run es utilizado para crear e iniciar un nuevo contenedor a partir de una imagen, en este caso de PostgreSQL. En este tambien configuramos la contraseña para el usuario principal de PostgreSQL para luego poder acceder a la base de datos.
+- El comando docker exec se utiliza para ejecutar comandos dentro de un contenedor en ejecución. En mi caso lo utilice para acceder al contenedor my-postgres que ya estaba corriendo.
 
 ### 12- Hacer el punto 11 con Microsoft SQL Server
 - Armar un contenedor con SQL Server
 - Crear BD, Tablas y ejecutar SELECT
-  
-### 13- Presentación del trabajo práctico.
+- Paso 1: Descargamos y levantamos un contenedor en docker de SQL Server 2019
+```bash
+docker pull mcr.microsoft.com/mssql/server:2019-latest
 
-Subir un archivo md (puede ser en una carpeta) trabajo-practico-02 con las salidas de los comandos utilizados. Si es necesario incluir también capturas de pantalla.
+docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=YourPassword123' -p 1433:1433 --name sql_server_container -d mcr.microsoft.com/mssql/server:2019-latest
+```
+![captura](imagenes/38.png)
+
+- Paso 2: Ahora debemos acceder a la BD desde SQL Server o Azure. En mi caso voy a ingresar desde Azure.
+![captura](imagenes/39.png)
+
+- Paso 3: Vamos a ejecutar las siguientes sentencias de SQL para crear una BD, Tablas y usar el SELECT:
+![captura](imagenes/40.png)
+![captura](imagenes/41.png)
+![captura](imagenes/42.png)
