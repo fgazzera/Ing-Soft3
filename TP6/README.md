@@ -893,11 +893,10 @@ G\. Vemos que se abre una ventana de Karma con Jasmine en la que nos indica que 
 
 
 H\. Vemos que los tests se ejecutaron correctamente:
-![image](https://github.com/user-attachments/assets/24172199-9b90-4e1c-8231-3c142f9d6160)
-
+- ![alt text](imagenes/26.png)
 
 I\. Verificamos que no esté corriendo nuestra API navegando a http://localhost:7150/swagger/index.html y recibiendo esta salida:
-![image](https://github.com/user-attachments/assets/550dd212-5254-4c7f-bea0-aa55c73021fe)
+- ![alt text](imagenes/27.png)
 
 J\. Los puntos G y H nos indican que se han ejecutado correctamente las pruebas inclusive sin tener acceso a la API, lo que confirma que es efectivamente un conjunto de pruebas unitarias que no requieres de una dependencia externa para funcionar.
 
@@ -913,6 +912,8 @@ A\. Instalamos dependencia karma-junit-reporter
 ```bash
 npm install karma-junit-reporter --save-dev
 ```
+- ![alt text](imagenes/28.png)
+
 B\. En el directorio raiz de nuestro proyecto (al mismo nivel que el archivo angular.json) creamos un archivo karma.conf.js con el siguiente contenido
 ```bash
 module.exports = function (config) {
@@ -940,11 +941,17 @@ module.exports = function (config) {
   });
 };
 ```
+
+- ![alt text](imagenes/29.png)
+
 C\. Ejecutamos nuestros test de la siguiente manera:
 ```bash
 ng test --karma-config=karma.conf.js --watch=false --browsers ChromeHeadless
 ```
+- ![alt text](imagenes/30.png)
+
 D\. Verificamos que se creo un archivo test-result.xml en el directorio test-results que está al mismo nivel que el directorio src
+- ![alt text](imagenes/31.png)
 
 #### 4.6 Modificamos el código de nuestra API y creamos nuevas pruebas unitarias:
 
@@ -952,14 +959,9 @@ A\. Realizar al menos 5 de las siguientes modificaciones sugeridas al código de
   - Al agregar y al editar un empleado, controlar que el nombre del empleado no esté repetido.
   - La longitud máxima del nombre y apellido del empleado debe ser de 100 caracteres.
   - Almacenar el nombre en la BD siempre con la primera letra de los nombres en Mayuscula y todo el apellido en Mayusculas. Ejemplo, si recibo juan carlos chamizo, se debe almacenar como Juan Carlos CHAMIZO.
-  - Asegurar que el nombre del empleado no contenga caracteres especiales o números, a menos que sea necesario (por ejemplo, caracteres especiales en apellidos como "O'Connor" o "García").
   - Validar que el nombre tenga un número mínimo de caracteres, por ejemplo, al menos dos caracteres para evitar entradas inválidas como "A".
-  - Verificar que el nombre no contenga números, ya que no es común en los nombres de empleados.
-  - Asegurar que cada parte del nombre (separada por espacios) tenga al menos un carácter o más, por ejemplo, para evitar "A B".
   - Verificar que no haya palabras vacías o que el nombre no esté compuesto solo de espacios.
-  - Prohibir el uso de nombres triviales o genéricos como "Empleado", "N/A", "Nombre", etc.
-  - Evitar que se ingresen caracteres repetidos de forma excesiva, como "Juuuuaannnn".
-  - Implementar un filtro para evitar el uso de palabras inapropiadas, ofensivas o que puedan violar políticas internas.
+  - Verificar que no haya numeros o caracteres especiales.
 En todos los casos donde no se cumplan las condiciones, la API debe devolver un error de HTTP 400 Bad Request y un Json indicando el error, por ejemplo:
 ```json
 {
@@ -969,254 +971,538 @@ En todos los casos donde no se cumplan las condiciones, la API debe devolver un 
 }
 ```
 
+- ![alt text](imagenes/32.png)
+
+- ![alt text](imagenes/33.png)
+
+- ![alt text](imagenes/34.png)
+
+- ![alt text](imagenes/35.png)
+
 B\. Crear las pruebas unitarias necesarias para validar las modificaciones realizadas en el código
+```bash
+using EmployeeCrudApi.Controllers;
+using EmployeeCrudApi.Data;
+using EmployeeCrudApi.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Xunit;
+
+namespace EmployeeCrudApi.Tests
+{
+    public class EmployeeControllerTests
+    {
+        private ApplicationDbContext GetInMemoryDbContext()
+        {
+            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()) // Crear una nueva base de datos en memoria para cada prueba
+                .Options;
+
+            return new ApplicationDbContext(options);
+        }
+
+        [Fact]
+        public async Task GetAll_ReturnsListOfEmployees()
+        {
+            // Arrange
+            var context = GetInMemoryDbContext();
+            context.Employees.AddRange(
+                new Employee { Id = 1, Name = "John Doe" },
+                new Employee { Id = 2, Name = "Jane Doe" }
+            );
+            context.SaveChanges();
+
+            var controller = new EmployeeController(context);
+
+            // Act
+            var result = await controller.GetAll();
+
+            // Assert
+            Assert.Equal(2, result.Count);
+            Assert.Equal("John Doe", result[0].Name);
+            Assert.Equal("Jane Doe", result[1].Name);
+        }
+
+        [Fact]
+        public async Task GetById_ReturnsEmployeeById()
+        {
+            // Arrange
+            var context = GetInMemoryDbContext();
+            context.Employees.Add(new Employee { Id = 1, Name = "John Doe" });
+            context.SaveChanges();
+
+            var controller = new EmployeeController(context);
+
+            // Act
+            var result = await controller.GetById(1);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(1, result.Id);
+            Assert.Equal("John Doe", result.Name);
+        }
+
+        [Fact]
+        public async Task Create_AddsEmployee()
+        {
+            // Arrange
+            var context = GetInMemoryDbContext();
+            var controller = new EmployeeController(context);
+
+            var newEmployee = new Employee { Id = 3, Name = "New Employee" };
+
+            // Act
+            await controller.Create(newEmployee);
+
+            // Assert
+            var employee = await context.Employees.FindAsync(3);
+            Assert.NotNull(employee);
+            Assert.Equal("New Employee", employee.Name);
+        }
+
+        [Fact]
+        public async Task Create_ReturnsBadRequest_WhenNameIsEmpty()
+        {
+            // Arrange
+            var context = GetInMemoryDbContext();
+            var controller = new EmployeeController(context);
+            var newEmployee = new Employee { Id = 4, Name = "" };
+
+            // Act
+            var result = await controller.Create(newEmployee);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task Create_ReturnsBadRequest_WhenNameExceedsMaxLength()
+        {
+            // Arrange
+            var context = GetInMemoryDbContext();
+            var controller = new EmployeeController(context);
+            var newEmployee = new Employee
+            {
+                Id = 5,
+                Name = new string('A', 101) // Nombre con 101 caracteres
+            };
+
+            // Act
+            var result = await controller.Create(newEmployee);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task Create_ReturnsBadRequest_WhenNameIsDuplicate()
+        {
+            // Arrange
+            var context = GetInMemoryDbContext();
+            context.Employees.Add(new Employee { Id = 6, Name = "John Doe" });
+            context.SaveChanges();
+
+            var controller = new EmployeeController(context);
+            var duplicateEmployee = new Employee { Id = 7, Name = "John Doe" };
+
+            // Act
+            var result = await controller.Create(duplicateEmployee);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task Create_FormatsNameCorrectly()
+        {
+            // Arrange
+            var context = GetInMemoryDbContext();
+            var controller = new EmployeeController(context);
+            var newEmployee = new Employee { Id = 8, Name = "juan carlos chamizo" };
+
+            // Act
+            await controller.Create(newEmployee);
+
+            // Assert
+            var employee = await context.Employees.FindAsync(8);
+            Assert.Equal("Juan Carlos CHAMIZO", employee.Name);
+        }
+
+        [Fact]
+        public async Task Update_UpdatesEmployee()
+        {
+            // Arrange
+            var context = GetInMemoryDbContext();
+            var existingEmployee = new Employee { Id = 1, Name = "Old Name" };
+            context.Employees.Add(existingEmployee);
+            context.SaveChanges();
+
+            var controller = new EmployeeController(context);
+
+            var updatedEmployee = new Employee { Id = 1, Name = "Updated Name" };
+
+            // Act
+            await controller.Update(updatedEmployee);
+
+            // Assert
+            var employee = await context.Employees.FindAsync(1);
+            Assert.NotNull(employee);
+            Assert.Equal("Updated Name", employee.Name);
+        }
+
+        [Fact]
+        public async Task Update_ReturnsBadRequest_WhenNameIsInvalid()
+        {
+            // Arrange
+            var context = GetInMemoryDbContext();
+            var existingEmployee = new Employee { Id = 9, Name = "Valid Name" };
+            context.Employees.Add(existingEmployee);
+            context.SaveChanges();
+
+            var controller = new EmployeeController(context);
+            var invalidEmployee = new Employee { Id = 9, Name = "" };
+
+            // Act
+            var result = await controller.Update(invalidEmployee);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task Delete_RemovesEmployee()
+        {
+            // Arrange
+            var context = GetInMemoryDbContext();
+            var employeeToDelete = new Employee { Id = 1, Name = "John Doe" };
+            context.Employees.Add(employeeToDelete);
+            context.SaveChanges();
+
+            var controller = new EmployeeController(context);
+
+            // Act
+            await controller.Delete(1);
+
+            // Assert
+            var employee = await context.Employees.FindAsync(1);
+            Assert.Null(employee); // Verifica que el empleado fue eliminado
+        }
+
+        [Fact]
+        public async Task Create_ReturnsBadRequest_WhenNameIsTooShort()
+        {
+            // Arrange
+            var context = GetInMemoryDbContext();
+            var controller = new EmployeeController(context);
+            var newEmployee = new Employee { Id = 1, Name = "A" }; // Nombre de un solo carácter
+
+            // Act
+            var result = await controller.Create(newEmployee);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal(400, badRequestResult.StatusCode);
+            Assert.Contains("El nombre del empleado debe tener al menos 2 caracteres.", badRequestResult.Value.ToString());
+        }
+
+        [Fact]
+        public async Task Create_ReturnsBadRequest_WhenNameIsTrivial()
+        {
+            // Arrange
+            var context = GetInMemoryDbContext();
+            var controller = new EmployeeController(context);
+            var trivialNames = new List<string> { "Empleado", "N/A", "Nombre" };
+
+            foreach (var trivialName in trivialNames)
+            {
+                var newEmployee = new Employee { Id = 1, Name = trivialName };
+
+                // Act
+                var result = await controller.Create(newEmployee);
+
+                // Assert
+                var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+                Assert.Equal(400, badRequestResult.StatusCode);
+                Assert.Contains("El nombre del empleado no puede ser trivial o genérico.", badRequestResult.Value.ToString());
+            }
+        }
+
+    }
+}
+```
+- ![alt text](imagenes/36.png)
 
 #### 4.7 Modificamos el código de nuestro Front y creamos nuevas pruebas unitarias:
 
 A\. Realizar en el código del front las mismas modificaciones hechas a la API. 
 
+1. Instalamos la libreria "Toast" 
+   ```bash
+   npm install ngx-toastr --save
+   npm install @angular/animations --save
+   ```
+
+2. Una vez instalada las libreias necesarias, las importamos al app.config.ts
+- ![alt text](imagenes/37.png)
+
+3. Ahora importamos el CSS con los estilos de Toast
+- ![alt text](imagenes/38.png)
+
+4. Importamos y configuramos a Toast y las animaciones en app.module.ts
+- ![alt text](imagenes/39.png)
+
+5. Importamos Toast en addemployee.component.ts y agregamos las validaciones para luego probarlas
+```bash
+import { Component, OnInit } from '@angular/core';
+import { Employee } from '../employee.model';
+import { EmployeeService } from '../employee.service';
+import { Router, ActivatedRoute, Params } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { ToastrService } from 'ngx-toastr';
+
+@Component({
+  selector: 'app-addemployee',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './addemployee.component.html',
+  styleUrls: ['./addemployee.component.css']
+})
+export class AddemployeeComponent implements OnInit {
+  newEmployee: Employee = new Employee(0, '', '');
+  employees: Employee[] = []; // Lista de empleados para validación de duplicados
+  submitBtnText: string = "Create";
+  imgLoadingDisplay: string = 'none';
+
+  constructor(private employeeService: EmployeeService,
+    private router: Router,
+    private activatedRoute: ActivatedRoute,
+    private toastr: ToastrService) {
+  }
+
+  ngOnInit(): void {
+    this.activatedRoute.queryParams.subscribe(params => {
+      const employeeId = params['id'];
+      if (employeeId) this.editEmployee(employeeId);
+    });
+
+    // Cargar lista de empleados para verificar duplicados
+    this.loadEmployees();
+  }
+
+  // Cargar lista de empleados
+  loadEmployees() {
+    this.employeeService.getAllEmployee().subscribe((data: Employee[]) => {
+      this.employees = data;
+    });
+  }
+
+  // Función para formatear el nombre y apellido
+  formatName(employee: Employee) {
+    if (employee.name) {
+      const names = employee.name.trim().split(' ');
+      employee.name = names.map((name, index) => {
+        if (index === 0) {
+          return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase(); // Primer nombre con mayúscula inicial
+        }
+        return name.toUpperCase(); // Apellidos en mayúsculas
+      }).join(' ');
+    }
+  }
+
+  // Verificar si el nombre del empleado ya existe en la lista
+  checkEmployeeNameExists(employeeName: string): boolean {
+    return this.employees.some(emp => emp.name.toLowerCase() === employeeName.toLowerCase());
+  }
+
+  // Validar los datos del empleado
+  validateEmployee(employee: Employee): boolean {
+    const nameRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ' ]+$/;
+    const forbiddenNames = ['Empleado', 'N/A', 'Nombre'];
+
+    if (!employee.name.trim()) {
+      this.toastr.error('El nombre es obligatorio.', 'Error');
+      return false;
+    }
+
+    if (employee.name.length < 2 || employee.name.length > 100) {
+      this.toastr.error('El nombre debe tener entre 2 y 100 caracteres.', 'Error');
+      return false;
+    }
+
+    if (!nameRegex.test(employee.name)) {
+      this.toastr.error('El nombre no puede contener números o caracteres especiales.', 'Error');
+      return false;
+    }
+
+    // Verificar nombres triviales o genéricos
+    if (forbiddenNames.includes(employee.name.trim().toLowerCase())) {
+      this.toastr.error('El nombre no puede ser genérico como "Empleado" o "N/A".', 'Error');
+      return false;
+    }
+
+    // Verificar si el nombre ya existe
+    if (this.checkEmployeeNameExists(employee.name)) {
+      this.toastr.error('El nombre del empleado ya existe.', 'Error');
+      return false;
+    }
+
+    return true;
+  }
+
+  // Agregar o actualizar el empleado
+  addEmployee(employee: Employee) {
+    this.formatName(employee); // Formatear el nombre antes de guardar
+
+    if (this.validateEmployee(employee)) {
+      if (employee.id === 0) {
+        employee.createdDate = new Date().toISOString();
+        this.employeeService.createEmployee(employee).subscribe(result => this.router.navigate(['/']));
+      } else {
+        employee.createdDate = new Date().toISOString();
+        this.employeeService.updateEmployee(employee).subscribe(result => this.router.navigate(['/']));
+      }
+      this.submitBtnText = "";
+      this.imgLoadingDisplay = 'inline';
+    }
+  }
+
+  editEmployee(employeeId: number) {
+    this.employeeService.getEmployeeById(employeeId).subscribe(res => {
+      this.newEmployee.id = res.id;
+      this.newEmployee.name = res.name;
+      this.submitBtnText = "Edit";
+    });
+  }
+}
+```
+
 B\. Las validaciones deben ser realizadas en el front sin llegar a la API, y deben ser mostradas en un toast como por ejemplo https://stackblitz.com/edit/angular12-toastr?file=src%2Fapp%2Fapp.component.ts o https://stackblitz.com/edit/angular-error-toast?file=src%2Fapp%2Fcore%2Frxjsops.ts
 
+- ![alt text](imagenes/41.png)
+- ![alt text](imagenes/42.png)
+- ![alt text](imagenes/43.png)
+- ![alt text](imagenes/44.png)
+- ![alt text](imagenes/45.png)
+- ![alt text](imagenes/46.png)
+
 C\. Crear las pruebas unitarias necesarias en el front para validar las modificaciones realizadas en el código del front.
-
-
-### 5- Instructivos:
-#### 5.1 Crear una Base de Datos SQL en Azure
-
-**Nota:** Se creará una BD con un costo de USD 4.90 por mes. El costo se prorratea por el tiempo que se utilice la BD (hasta que se elimine el recurso). Es decir que si por ejemplo se usa por 1 día se cobrarán de la Tarjeta de crédito de su suscripción  unos 0.17 USD-
-
-1\. Navegar a [https://portal.azure.com/#home](https://portal.azure.com/#home)
-
-
-2\. Seleccionar Grupo de Recursos
-
-![](https://ajeuwbhvhr.cloudimg.io/colony-recorder.s3.amazonaws.com/files/2024-09-06/6b4af0eb-94ff-4d73-8462-bc46d37150ea/ascreenshot.jpeg?tl_px=0,0&br_px=1376,769&force_format=jpeg&q=100&width=1120.0&wat=1&wat_opacity=0.7&wat_gravity=northwest&wat_url=https://colony-recorder.s3.us-west-1.amazonaws.com/images/watermarks/FB923C_standard.png&wat_pad=250,270)
-
-
-3\. Click en Crear
-
-![](https://ajeuwbhvhr.cloudimg.io/colony-recorder.s3.amazonaws.com/files/2024-09-06/d848857e-de1f-482c-9b7f-1cb5ec094747/ascreenshot.jpeg?tl_px=0,0&br_px=859,480&force_format=jpeg&q=100&width=860&wat_scale=76&wat=1&wat_opacity=0.7&wat_gravity=northwest&wat_url=https://colony-recorder.s3.us-west-1.amazonaws.com/images/watermarks/FB923C_standard.png&wat_pad=297,131)
-
-
-4\. Buscar "sql database"
-
-
-5\. Click "sql database"
-
-![](https://ajeuwbhvhr.cloudimg.io/colony-recorder.s3.amazonaws.com/files/2024-09-06/9de63352-364e-4f73-9aa6-1a6b48b17beb/ascreenshot.jpeg?tl_px=0,0&br_px=859,480&force_format=jpeg&q=100&width=860&wat_scale=76&wat=1&wat_opacity=0.7&wat_gravity=northwest&wat_url=https://colony-recorder.s3.us-west-1.amazonaws.com/images/watermarks/FB923C_standard.png&wat_pad=350,177)
-
-
-6\. Click en Crear
-
-![](https://ajeuwbhvhr.cloudimg.io/colony-recorder.s3.amazonaws.com/files/2024-09-06/ae6e9368-9d55-4fec-910d-65bd60e68699/ascreenshot.jpeg?tl_px=68,487&br_px=928,968&force_format=jpeg&q=100&width=860&wat_scale=76&wat=1&wat_opacity=0.7&wat_gravity=northwest&wat_url=https://colony-recorder.s3.us-west-1.amazonaws.com/images/watermarks/FB923C_standard.png&wat_pad=402,213)
-
-
-7\. Ingresar &lt;Sus-Iniciales&gt;-sql-db" como nombre de la base de datos"
-
-![](https://ajeuwbhvhr.cloudimg.io/colony-recorder.s3.amazonaws.com/files/2024-09-06/e1ec24d7-ddcf-41db-8430-60856f9d67f1/ascreenshot.jpeg?tl_px=0,418&br_px=982,968&force_format=jpeg&q=100&width=983&wat_scale=87&wat=1&wat_opacity=0.7&wat_gravity=northwest&wat_url=https://colony-recorder.s3.us-west-1.amazonaws.com/images/watermarks/FB923C_standard.png&wat_pad=387,346)
-
-
-8\. Click "Crear nuevo"
-
-![](https://ajeuwbhvhr.cloudimg.io/colony-recorder.s3.amazonaws.com/files/2024-09-06/d1c9ab83-8de5-4218-ac79-8102cbed7ce3/ascreenshot.jpeg?tl_px=0,487&br_px=859,968&force_format=jpeg&q=100&width=860&wat_scale=76&wat=1&wat_opacity=0.7&wat_gravity=northwest&wat_url=https://colony-recorder.s3.us-west-1.amazonaws.com/images/watermarks/FB923C_standard.png&wat_pad=309,346)
-
-
-9\. Ingresas "&lt;sus-iniciales&gt;-sql-server01" como nombre del servidor
-
-
-10\. Click "(US) East US"
-
-![](https://ajeuwbhvhr.cloudimg.io/colony-recorder.s3.amazonaws.com/files/2024-09-06/1b6df987-2a35-49d9-9068-8ee166934aee/ascreenshot.jpeg?tl_px=0,111&br_px=859,592&force_format=jpeg&q=100&width=860&wat_scale=76&wat=1&wat_opacity=0.7&wat_gravity=northwest&wat_url=https://colony-recorder.s3.us-west-1.amazonaws.com/images/watermarks/FB923C_standard.png&wat_pad=398,212)
-
-
-11\. Click en el combo de Ubicación y buscar una Ubicación Disponible
-
-![](https://ajeuwbhvhr.cloudimg.io/colony-recorder.s3.amazonaws.com/files/2024-09-06/1b1774ff-c8a7-4aca-841b-97220f7f1dee/ascreenshot.jpeg?tl_px=0,102&br_px=859,583&force_format=jpeg&q=100&width=860&wat_scale=76&wat=1&wat_opacity=0.7&wat_gravity=northwest&wat_url=https://colony-recorder.s3.us-west-1.amazonaws.com/images/watermarks/FB923C_standard.png&wat_pad=376,212)
-
-
-12\. Click "(US) South Central US"
-
-![](https://ajeuwbhvhr.cloudimg.io/colony-recorder.s3.amazonaws.com/files/2024-09-06/ebdf1e76-cee4-4f70-b0f7-cd74764534a6/ascreenshot.jpeg?tl_px=0,109&br_px=859,590&force_format=jpeg&q=100&width=860&wat_scale=76&wat=1&wat_opacity=0.7&wat_gravity=northwest&wat_url=https://colony-recorder.s3.us-west-1.amazonaws.com/images/watermarks/FB923C_standard.png&wat_pad=402,212)
-
-
-13\. Click "Uso de la autenticación de SQL"
-
-![](https://ajeuwbhvhr.cloudimg.io/colony-recorder.s3.amazonaws.com/files/2024-09-06/2de48b5b-6dba-4da2-be76-58b13dd96acc/ascreenshot.jpeg?tl_px=0,469&br_px=859,950&force_format=jpeg&q=100&width=860&wat_scale=76&wat=1&wat_opacity=0.7&wat_gravity=northwest&wat_url=https://colony-recorder.s3.us-west-1.amazonaws.com/images/watermarks/FB923C_standard.png&wat_pad=327,212)
-
-
-14\. Click the "Inicio de sesión del administrador del servidor" field.
-
-![](https://ajeuwbhvhr.cloudimg.io/colony-recorder.s3.amazonaws.com/files/2024-09-06/dcb5feab-afdc-4b48-8d9b-e2e7a7564b3f/ascreenshot.jpeg?tl_px=0,487&br_px=859,968&force_format=jpeg&q=100&width=860&wat_scale=76&wat=1&wat_opacity=0.7&wat_gravity=northwest&wat_url=https://colony-recorder.s3.us-west-1.amazonaws.com/images/watermarks/FB923C_standard.png&wat_pad=329,230)
-
-
-15\. Type "sqladmin [[tab]]"
-
-
-16\. Ingresar contraseña deseada, por ejemplo Azure@456, repetirla y dar click en Aceptar
-
-![](https://ajeuwbhvhr.cloudimg.io/colony-recorder.s3.amazonaws.com/files/2024-09-06/25848ed9-de32-4478-8312-b83766d713a5/ascreenshot.jpeg?tl_px=0,487&br_px=859,968&force_format=jpeg&q=100&width=860&wat_scale=76&wat=1&wat_opacity=0.7&wat_gravity=northwest&wat_url=https://colony-recorder.s3.us-west-1.amazonaws.com/images/watermarks/FB923C_standard.png&wat_pad=64,414)
-
-
-17\. Click en Implementación.
-
-![](https://ajeuwbhvhr.cloudimg.io/colony-recorder.s3.amazonaws.com/files/2024-09-06/7cf6b6f0-3735-4bfb-bee6-08b85bb8e824/ascreenshot.jpeg?tl_px=0,426&br_px=859,907&force_format=jpeg&q=100&width=860&wat_scale=76&wat=1&wat_opacity=0.7&wat_gravity=northwest&wat_url=https://colony-recorder.s3.us-west-1.amazonaws.com/images/watermarks/FB923C_standard.png&wat_pad=267,212)
-
-
-18\. Click "Configurar base de datos"
-
-![](https://ajeuwbhvhr.cloudimg.io/colony-recorder.s3.amazonaws.com/files/2024-09-06/01966464-a4f2-4869-a6a5-1eaf98afe3e0/ascreenshot.jpeg?tl_px=0,470&br_px=859,951&force_format=jpeg&q=100&width=860&wat_scale=76&wat=1&wat_opacity=0.7&wat_gravity=northwest&wat_url=https://colony-recorder.s3.us-west-1.amazonaws.com/images/watermarks/FB923C_standard.png&wat_pad=325,212)
-
-
-19\. Click "Básico (Para cargas de trabajo menos exigentes.)"
-
-![](https://ajeuwbhvhr.cloudimg.io/colony-recorder.s3.amazonaws.com/files/2024-09-06/294357c6-f9fd-407c-8ec5-d17881a0a32d/ascreenshot.jpeg?tl_px=69,145&br_px=928,626&force_format=jpeg&q=100&width=860&wat_scale=76&wat=1&wat_opacity=0.7&wat_gravity=northwest&wat_url=https://colony-recorder.s3.us-west-1.amazonaws.com/images/watermarks/FB923C_standard.png&wat_pad=402,212)
-
-
-20\. Click "Aplicar"
-
-![](https://ajeuwbhvhr.cloudimg.io/colony-recorder.s3.amazonaws.com/files/2024-09-06/92ecf786-cc63-460e-be22-ef40bf11fb3e/ascreenshot.jpeg?tl_px=0,6&br_px=1541,968&force_format=jpeg&q=100&width=1120.0&wat=1&wat_opacity=0.7&wat_gravity=northwest&wat_url=https://colony-recorder.s3.us-west-1.amazonaws.com/images/watermarks/FB923C_standard.png&wat_pad=9,642)
-
-
-21\. Click here.
-
-![](https://ajeuwbhvhr.cloudimg.io/colony-recorder.s3.amazonaws.com/files/2024-09-06/c3dd8e15-9643-4804-9de7-ae8f47eb98d7/ascreenshot.jpeg?tl_px=0,487&br_px=859,968&force_format=jpeg&q=100&width=860&wat_scale=76&wat=1&wat_opacity=0.7&wat_gravity=northwest&wat_url=https://colony-recorder.s3.us-west-1.amazonaws.com/images/watermarks/FB923C_standard.png&wat_pad=230,428)
-
-
-22\. Click "Punto de conexión público"
-
-![](https://ajeuwbhvhr.cloudimg.io/colony-recorder.s3.amazonaws.com/files/2024-09-06/b4445028-1e4f-466d-83e1-55a810ea0275/ascreenshot.jpeg?tl_px=0,144&br_px=859,625&force_format=jpeg&q=100&width=860&wat_scale=76&wat=1&wat_opacity=0.7&wat_gravity=northwest&wat_url=https://colony-recorder.s3.us-west-1.amazonaws.com/images/watermarks/FB923C_standard.png&wat_pad=305,212)
-
-
-23\. Click "Sí"
-
-![](https://ajeuwbhvhr.cloudimg.io/colony-recorder.s3.amazonaws.com/files/2024-09-06/135ebcbf-6416-4c95-96ea-57587cf909a6/ascreenshot.jpeg?tl_px=0,350&br_px=859,831&force_format=jpeg&q=100&width=860&wat_scale=76&wat=1&wat_opacity=0.7&wat_gravity=northwest&wat_url=https://colony-recorder.s3.us-west-1.amazonaws.com/images/watermarks/FB923C_standard.png&wat_pad=348,212)
-
-
-24\. Click "Sí"
-
-![](https://ajeuwbhvhr.cloudimg.io/colony-recorder.s3.amazonaws.com/files/2024-09-06/fec30783-8133-456e-8b57-ecb94617f268/user_cropped_screenshot.jpeg?tl_px=0,163&br_px=982,712&force_format=jpeg&q=100&width=983&wat_scale=87&wat=1&wat_opacity=0.7&wat_gravity=northwest&wat_url=https://colony-recorder.s3.us-west-1.amazonaws.com/images/watermarks/FB923C_standard.png&wat_pad=342,243)
-
-
-25\. Click here.
-
-![](https://ajeuwbhvhr.cloudimg.io/colony-recorder.s3.amazonaws.com/files/2024-09-06/e1c050da-1b6c-4aab-8443-c2d71cbd119e/ascreenshot.jpeg?tl_px=0,487&br_px=859,968&force_format=jpeg&q=100&width=860&wat_scale=76&wat=1&wat_opacity=0.7&wat_gravity=northwest&wat_url=https://colony-recorder.s3.us-west-1.amazonaws.com/images/watermarks/FB923C_standard.png&wat_pad=325,429)
-
-
-26\. Click "Siguiente: Configuración adicional >"
-
-![](https://ajeuwbhvhr.cloudimg.io/colony-recorder.s3.amazonaws.com/files/2024-09-06/3abe0aa9-a898-4662-b043-f2144482c761/ascreenshot.jpeg?tl_px=0,198&br_px=1376,968&force_format=jpeg&q=100&width=1120.0&wat=1&wat_opacity=0.7&wat_gravity=northwest&wat_url=https://colony-recorder.s3.us-west-1.amazonaws.com/images/watermarks/FB923C_standard.png&wat_pad=271,561)
-
-
-27\. Click "Siguiente: Revisar y crear >"
-
-![](https://ajeuwbhvhr.cloudimg.io/colony-recorder.s3.amazonaws.com/files/2024-09-06/64ddf80f-4816-4fa4-91ee-cf583d36e5c2/ascreenshot.jpeg?tl_px=0,6&br_px=1541,968&force_format=jpeg&q=100&width=1120.0&wat=1&wat_opacity=0.7&wat_gravity=northwest&wat_url=https://colony-recorder.s3.us-west-1.amazonaws.com/images/watermarks/FB923C_standard.png&wat_pad=258,632)
-
-
-28\. Click here.
-
-![](https://ajeuwbhvhr.cloudimg.io/colony-recorder.s3.amazonaws.com/files/2024-09-06/07814b9b-1d6a-44db-b1c2-b582059a9540/ascreenshot.jpeg?tl_px=0,487&br_px=859,968&force_format=jpeg&q=100&width=860&wat_scale=76&wat=1&wat_opacity=0.7&wat_gravity=northwest&wat_url=https://colony-recorder.s3.us-west-1.amazonaws.com/images/watermarks/FB923C_standard.png&wat_pad=57,419)
-
-
-29\. Click "Ir al recurso"
-
-![](https://ajeuwbhvhr.cloudimg.io/colony-recorder.s3.amazonaws.com/files/2024-09-06/576067e4-6ed7-443e-8b01-59a37d9e72a8/ascreenshot.jpeg?tl_px=0,176&br_px=859,657&force_format=jpeg&q=100&width=860&wat_scale=76&wat=1&wat_opacity=0.7&wat_gravity=northwest&wat_url=https://colony-recorder.s3.us-west-1.amazonaws.com/images/watermarks/FB923C_standard.png&wat_pad=356,212)
-
-
-30\. Click "Editor de consultas (versión preliminar)"
-
-![](https://ajeuwbhvhr.cloudimg.io/colony-recorder.s3.amazonaws.com/files/2024-09-06/379cc073-f83a-4c7d-a750-9421a52f63e9/ascreenshot.jpeg?tl_px=0,100&br_px=859,581&force_format=jpeg&q=100&width=860&wat_scale=76&wat=1&wat_opacity=0.7&wat_gravity=northwest&wat_url=https://colony-recorder.s3.us-west-1.amazonaws.com/images/watermarks/FB923C_standard.png&wat_pad=149,212)
-
-
-31\. Click the "Inicio de sesión" field.
-
-![](https://ajeuwbhvhr.cloudimg.io/colony-recorder.s3.amazonaws.com/files/2024-09-06/aad2e638-d236-4285-9d78-a1e52acbd72b/ascreenshot.jpeg?tl_px=244,235&br_px=1104,716&force_format=jpeg&q=100&width=860&wat_scale=76&wat=1&wat_opacity=0.7&wat_gravity=northwest&wat_url=https://colony-recorder.s3.us-west-1.amazonaws.com/images/watermarks/FB923C_standard.png&wat_pad=402,212)
-
-
-32\. Ingresar usuario y contraseña, por ejemplo sqladmin y Azure@456
-
-
-33\. Click "Aceptar"
-
-![](https://ajeuwbhvhr.cloudimg.io/colony-recorder.s3.amazonaws.com/files/2024-09-06/ccbcf84a-79a4-4669-bb0e-d06520c29d52/ascreenshot.jpeg?tl_px=283,343&br_px=1143,824&force_format=jpeg&q=100&width=860&wat_scale=76&wat=1&wat_opacity=0.7&wat_gravity=northwest&wat_url=https://colony-recorder.s3.us-west-1.amazonaws.com/images/watermarks/FB923C_standard.png&wat_pad=402,212)
-
-
-34\. Click here.
-
-![](https://ajeuwbhvhr.cloudimg.io/colony-recorder.s3.amazonaws.com/files/2024-09-06/5e2fe0cc-9b57-4a55-9d2c-89ed5902f586/File.jpeg?tl_px=543,148&br_px=1403,629&force_format=jpeg&q=100&width=860&wat_scale=76&wat=1&wat_opacity=0.7&wat_gravity=northwest&wat_url=https://colony-recorder.s3.us-west-1.amazonaws.com/images/watermarks/FB923C_standard.png&wat_pad=402,212)
-
-
-35\. Ingresar el siguiente script de creacion de Tabla y registros
-
-```sql
-
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[Employees](
-	[Id] [int] IDENTITY(1,1) NOT NULL,
-	[Name] [nvarchar](max) NULL,
-	[CreatedDate] [datetime2](7) NOT NULL,
- CONSTRAINT [PK_Employees] PRIMARY KEY CLUSTERED 
-(
-	[Id] ASC
-)WITH (STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-GO
-SET IDENTITY_INSERT [dbo].[Employees] ON 
-GO
-INSERT [dbo].[Employees] ([Id], [Name], [CreatedDate]) VALUES (1, N'Juan Perez', CAST(N'2024-09-05T00:00:00.0000000' AS DateTime2))
-GO
-INSERT [dbo].[Employees] ([Id], [Name], [CreatedDate]) VALUES (2, N'Carla Ruiz', CAST(N'2024-09-05T22:22:47.4405720' AS DateTime2))
-GO
-INSERT [dbo].[Employees] ([Id], [Name], [CreatedDate]) VALUES (3, N'Carlos Gomez', CAST(N'2024-09-06T09:16:50.0709430' AS DateTime2))
-GO
-INSERT [dbo].[Employees] ([Id], [Name], [CreatedDate]) VALUES (4, N'Joaquin Zarate', CAST(N'2024-09-06T09:19:37.8987160' AS DateTime2))
-GO
-INSERT [dbo].[Employees] ([Id], [Name], [CreatedDate]) VALUES (5, N'Luis Rodriguez', CAST(N'2024-09-06T09:23:31.3244340' AS DateTime2))
-GO
-SET IDENTITY_INSERT [dbo].[Employees] OFF
-GO
-
+```bash
+import { TestBed, ComponentFixture } from '@angular/core/testing';
+import { AddemployeeComponent } from './addemployee.component';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { ActivatedRoute } from '@angular/router';
+import { of } from 'rxjs'; // para simular observables
+import { DatePipe } from '@angular/common';
+import { ToastrService } from 'ngx-toastr';
+import { EmployeeService } from '../employee.service';
+import { Employee } from '../employee.model';
+
+describe('AddemployeeComponent', () => {
+  let component: AddemployeeComponent;
+  let fixture: ComponentFixture<AddemployeeComponent>;
+  let employeeService: EmployeeService;
+  let toastrService: ToastrService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [AddemployeeComponent, HttpClientTestingModule],
+      providers: [
+        DatePipe,
+        {
+          provide: ActivatedRoute, // Simula ActivatedRoute
+          useValue: {
+            queryParams: of({ id: 1 }) // Simula el parámetro id en la URL
+          }
+        },
+        { provide: ToastrService, useValue: { error: jasmine.createSpy('error') } }, // Mock del ToastrService
+        EmployeeService
+      ]
+    });
+
+    fixture = TestBed.createComponent(AddemployeeComponent);
+    component = fixture.componentInstance;
+    employeeService = TestBed.inject(EmployeeService);
+    toastrService = TestBed.inject(ToastrService);
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+
+  it('should format name and surname correctly', () => {
+    const employee: Employee = { id: 0, name: 'juan perez', createdDate: '' };
+    component.formatName(employee);
+    expect(employee.name).toBe('Juan PEREZ');
+  });
+
+  it('should detect duplicate employee names', () => {
+    const employees = [
+      { id: 1, name: 'John Doe', createdDate: '' },
+      { id: 2, name: 'Jane Smith', createdDate: '' }
+    ] as Employee[];
+
+    component.employees = employees;
+
+    expect(component.checkEmployeeNameExists('John Doe')).toBe(true);
+    expect(component.checkEmployeeNameExists('john doe')).toBe(true); // Detección sin sensibilidad a mayúsculas
+    expect(component.checkEmployeeNameExists('Mike Tyson')).toBe(false);
+  });
+
+  it('should validate employee name', () => {
+    const employee: Employee = { id: 0, name: '', createdDate: '' };
+
+    // Nombre vacío
+    let isValid = component.validateEmployee(employee);
+    expect(isValid).toBe(false);
+    expect(toastrService.error).toHaveBeenCalledWith('El nombre es obligatorio.', 'Error');
+
+    // Nombre corto
+    employee.name = 'A';
+    isValid = component.validateEmployee(employee);
+    expect(isValid).toBe(false);
+    expect(toastrService.error).toHaveBeenCalledWith('El nombre debe tener entre 2 y 100 caracteres.', 'Error');
+
+    // Nombre con caracteres inválidos
+    employee.name = 'John123';
+    isValid = component.validateEmployee(employee);
+    expect(isValid).toBe(false);
+    expect(toastrService.error).toHaveBeenCalledWith('El nombre no puede contener números o caracteres especiales.', 'Error');
+
+    // Nombre duplicado
+    component.employees = [{ id: 1, name: 'John Doe', createdDate: '' }];
+    employee.name = 'John Doe';
+    isValid = component.validateEmployee(employee);
+    expect(isValid).toBe(false);
+    expect(toastrService.error).toHaveBeenCalledWith('El nombre del empleado ya existe.', 'Error');
+
+    // Nombre válido
+    employee.name = 'Michael Jordan';
+    isValid = component.validateEmployee(employee);
+    expect(isValid).toBe(true);
+  });
+
+  it('should call addEmployee and validate the flow', () => {
+    const employee: Employee = { id: 0, name: 'new employee', createdDate: '' };
+    spyOn(component, 'formatName').and.callThrough();
+    spyOn(component, 'validateEmployee').and.returnValue(true);
+    spyOn(employeeService, 'createEmployee').and.returnValue(of(employee));
+
+    component.addEmployee(employee);
+
+    expect(component.formatName).toHaveBeenCalled();
+    expect(component.validateEmployee).toHaveBeenCalled();
+    expect(employeeService.createEmployee).toHaveBeenCalledWith(employee);
+  });
+});
 ```
-36\. Click en Ejecutar
-
-![](https://ajeuwbhvhr.cloudimg.io/colony-recorder.s3.amazonaws.com/files/2024-09-06/da63790b-83e9-4548-9deb-3a1f29168443/ascreenshot.jpeg?tl_px=0,0&br_px=1376,769&force_format=jpeg&q=100&width=1120.0&wat=1&wat_opacity=0.7&wat_gravity=northwest&wat_url=https://colony-recorder.s3.us-west-1.amazonaws.com/images/watermarks/FB923C_standard.png&wat_pad=479,156)
-
-
-37\. Borrar el script
-
-![](https://ajeuwbhvhr.cloudimg.io/colony-recorder.s3.amazonaws.com/files/2024-09-06/eece78cd-d480-44a5-b05a-d63bc5e3807a/ascreenshot.jpeg?tl_px=164,4&br_px=1541,773&force_format=jpeg&q=100&width=1120.0&wat=1&wat_opacity=0.7&wat_gravity=northwest&wat_url=https://colony-recorder.s3.us-west-1.amazonaws.com/images/watermarks/FB923C_standard.png&wat_pad=621,276)
-
-
-38\. Type "Select * from Employees"
-
-
-39\. Click En Ejecutar.
-
-![](https://ajeuwbhvhr.cloudimg.io/colony-recorder.s3.amazonaws.com/files/2024-09-06/89d8081a-6c21-431d-aa23-53534bf0dd38/ascreenshot.jpeg?tl_px=0,0&br_px=1376,769&force_format=jpeg&q=100&width=1120.0&wat=1&wat_opacity=0.7&wat_gravity=northwest&wat_url=https://colony-recorder.s3.us-west-1.amazonaws.com/images/watermarks/FB923C_standard.png&wat_pad=479,163)
-
-
-40\. Click "Información general"
-
-![](https://ajeuwbhvhr.cloudimg.io/colony-recorder.s3.amazonaws.com/files/2024-09-06/4b5b1030-256a-4007-8f07-d17f322513f3/ascreenshot.jpeg?tl_px=0,0&br_px=1541,961&force_format=jpeg&q=100&width=1120.0&wat=1&wat_opacity=0.7&wat_gravity=northwest&wat_url=https://colony-recorder.s3.us-west-1.amazonaws.com/images/watermarks/FB923C_standard.png&wat_pad=22,95)
-
-
-41\. Click "Mostrar las cadenas de conexión de la base de datos"
-
-![](https://ajeuwbhvhr.cloudimg.io/colony-recorder.s3.amazonaws.com/files/2024-09-06/46644253-df61-4dfb-8977-82afc2cab377/ascreenshot.jpeg?tl_px=164,0&br_px=1541,769&force_format=jpeg&q=100&width=1120.0&wat=1&wat_opacity=0.7&wat_gravity=northwest&wat_url=https://colony-recorder.s3.us-west-1.amazonaws.com/images/watermarks/FB923C_standard.png&wat_pad=837,244)
-
-
-42\. Copiar
-
-![](https://ajeuwbhvhr.cloudimg.io/colony-recorder.s3.amazonaws.com/files/2024-09-06/d3f34801-ac57-42d3-800f-ab27ff258a15/ascreenshot.jpeg?tl_px=164,120&br_px=1541,889&force_format=jpeg&q=100&width=1120.0&wat=1&wat_opacity=0.7&wat_gravity=northwest&wat_url=https://colony-recorder.s3.us-west-1.amazonaws.com/images/watermarks/FB923C_standard.png&wat_pad=644,277)
-
-
-43\. Click this icon.
-
-![](https://ajeuwbhvhr.cloudimg.io/colony-recorder.s3.amazonaws.com/files/2024-09-06/5bcf3d84-707a-4e79-8995-90c17dc413b3/ascreenshot.jpeg?tl_px=681,321&br_px=1541,802&force_format=jpeg&q=100&width=860&wat_scale=76&wat=1&wat_opacity=0.7&wat_gravity=northwest&wat_url=https://colony-recorder.s3.us-west-1.amazonaws.com/images/watermarks/FB923C_standard.png&wat_pad=798,212)
-
-
+- Corremos los test:
+  - ![alt text](imagenes/47.png)
+  - ![alt text](imagenes/48.png)
 
 ### 6-  Presentación del trabajo práctico.
 - Subir un doc al repo con las capturas de pantalla de los pasos realizados
