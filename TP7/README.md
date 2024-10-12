@@ -4,7 +4,7 @@
 #### 4.1 Agregar Code Coverage a nuestras pruebas unitarias de backend y front-end e integrarlas junto con sus resultados en nuestro pipeline de build.
 - Desarrollo del punto 4.1: 
 	- ##### 4.1.1 En el directorio raiz de nuestro proyecto Angular instalar el siguiente paquete:
-		- ![alt text](imagenes/1.png)
+		- ![alt text](imagenes/1.png)*+/
 
    	 - ##### 4.1.2 Editar nuestro archivo karma.conf.js para que incluya reporte de cobertura
   		- ![alt text](imagenes/2.png)

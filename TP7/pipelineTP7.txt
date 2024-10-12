@@ -1,0 +1,261 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  nodeVersion: '20.x'
+  configuration: 'Release'
+  solution: '**/*.sln'
+
+stages:
+- stage: Build
+  displayName: 'Build and Test'
+  jobs:
+    # Job para el Back-End
+    - job: BuildBackJob
+      displayName: 'Build Back and Unit Tests'
+      steps:
+        - checkout: self
+          fetchDepth: 0
+
+        # Restaurar paquetes NuGet
+        - task: DotNetCoreCLI@2
+          displayName: 'Restaurar paquetes NuGet'
+          inputs:
+            command: restore
+            projects: '$(solution)'
+
+        # Ejecutar pruebas del back-end
+        - task: DotNetCoreCLI@2
+          displayName: 'Ejecutar pruebas de la API'
+          inputs:
+            command: 'test'
+            projects: '**/*.Tests.csproj'
+            arguments: '--collect:"XPlat Code Coverage"'
+
+        # Preparación de SonarCloud para el backend
+        - task: SonarCloudPrepare@2
+          inputs:
+            SonarCloud: 'SonarCloud'
+            organization: 'fgazzera'
+            scannerMode: 'MSBuild'
+            projectKey: 'fgazzera_TP7_AngularAPI_Back'
+            projectName: 'TP7_AngularAPI_Back'
+          displayName: 'Preparación SonarCloud para Back'
+
+        - task: PublishCodeCoverageResults@2
+          inputs:
+            summaryFileLocation: '$(Agent.TempDirectory)/**/*.cobertura.xml'
+            failIfCoverageEmpty: false
+          displayName: 'Publicar resultados de code coverage del back-end'
+
+        # Compilar la solución del back-end
+        - task: DotNetCoreCLI@2
+          displayName: 'Compilar Back'
+          inputs:
+            command: 'build'
+            projects: '$(solution)'
+            arguments: '--configuration $(configuration) --output $(buildOutput)/api  --self-contained false'
+
+        # Análisis de SonarCloud para el backend
+        - task: SonarCloudAnalyze@2
+          inputs:
+            jdkversion: 'JAVA_HOME_17_X64'
+          displayName: 'Análisis SonarCloud del Back'
+
+        # Publicar Analisis de SonarCloud
+        - task: SonarCloudPublish@2
+          inputs:
+            pollingTimeoutSec: '300'
+          displayName: 'Publicación resultados de SonarCloud del Back'
+
+
+        # Publicar Back-End
+        - task: DotNetCoreCLI@2
+          displayName: 'Publicar Back'
+          inputs:
+            command: publish
+            publishWebProjects: True
+            arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+            zipAfterPublish: false
+
+        # Publicar Artefactos del Back-End
+        - task: PublishBuildArtifacts@1
+          displayName: 'Publicar Artefactos de Back'
+          inputs:
+            PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+            ArtifactName: 'Back'
+            publishLocation: 'Container'
+      
+        #TP8
+        # Publicar Dockerfile de Back
+#        - task: PublishPipelineArtifact@1
+#          displayName: 'Publicar Dockerfile de Back'
+#          inputs:
+#            targetPath: '$(Build.SourcesDirectory)/docker/api/dockerfile'
+#            artifact: 'dockerfile-back'
+
+    # Job para el Front-End
+    - job: BuildFrontJob
+      displayName: 'Build y Test del Front-End'
+      steps:
+        - checkout: self
+          fetchDepth: 0
+      # Instalar Node.js
+        - task: NodeTool@0
+          inputs:
+            versionSpec: '18.x'
+          displayName: 'Instalar Node.js'
+        
+        # Cachear dependencias de npm
+        - task: Cache@2
+          inputs:
+            key: 'npm | "$(Agent.OS)" | EmployeeCrudAngular/package-lock.json'
+            path: 'EmployeeCrudAngular/node_modules'
+            restoreKeys: |
+              npm | "$(Agent.OS)"
+          displayName: 'Cachear dependencias de npm'
+
+        # Instalar dependencias del front-end
+        - script: npm install
+          displayName: 'npm install'
+          workingDirectory: $(System.DefaultWorkingDirectory)/EmployeeCrudAngular
+
+        # Tarea de SonarCloud pre Build
+        - task: SonarCloudPrepare@2
+          displayName: 'Preparar SonarCloud para Front-End'
+          inputs:
+            SonarCloud: 'SonarCloud'
+            organization: 'fgazzera'
+            scannerMode: 'CLI'
+            configMode: manual
+            cliProjectKey: 'fgazzera_TP7_AngularAPI_Front'
+            cliProjectName: 'TP7_AngularAPI_Front'
+            cliSources: '$(Build.SourcesDirectory)/EmployeeCrudAngular'
+            extraProperties: |
+              sonar.projectBaseDir=$(Build.SourcesDirectory)/EmployeeCrudAngular
+
+        # Ejecutar pruebas del front-end
+        - script: npx ng test --karma-config=karma.conf.js --watch=false --browsers ChromeHeadless --code-coverage
+          displayName: 'Ejecutar pruebas del front'
+          workingDirectory: $(System.DefaultWorkingDirectory)/EmployeeCrudAngular
+          continueOnError: true
+
+        # Publicación de resultados de cobertura de código del frontend
+        - task: PublishCodeCoverageResults@2
+          inputs:
+            summaryFileLocation: '$(System.DefaultWorkingDirectory)/EmployeeCrudAngular/coverage/lcov.info'
+            failIfCoverageEmpty: false
+          condition: always()
+          displayName: 'Publicar resultados de code coverage del front'
+
+        # Publicación de resultados de pruebas unitarias del frontend
+        - task: PublishTestResults@2
+          inputs:
+            testResultsFormat: 'JUnit'
+            testResultsFiles: '$(System.DefaultWorkingDirectory)/EmployeeCrudAngular/test-results/test-results.xml'
+            failTaskOnFailedTests: true
+          condition: always()
+          displayName: 'Publicar resultados de pruebas unitarias del front'
+
+        # Compilar el front-end
+        - script: npx ng build --configuration production
+          displayName: 'Compilar Front'
+          workingDirectory: $(System.DefaultWorkingDirectory)/EmployeeCrudAngular
+          condition: succeeded()
+
+        # Analisis de SonarCloud del front-end
+        - task: SonarCloudAnalyze@2
+          displayName: 'Analisis de SonarCloud del Front-End'
+          inputs:
+            jdkversion: 'JAVA_HOME_17_X64'
+
+        # Publicar resultados de SonarCloud del front-end
+        - task: SonarCloudPublish@2
+          displayName: 'Publicar resultados de SonarCloud del Front-End'
+          inputs:
+            pollingTimeoutSec: '300'
+
+        # Publicación de artefactos del frontend
+        - task: PublishBuildArtifacts@1
+          displayName: 'Publicar artefactos del Front'
+          inputs:
+            PathtoPublish: '$(System.DefaultWorkingDirectory)/EmployeeCrudAngular/dist'
+            ArtifactName: 'Front'
+            publishLocation: 'Container'
+
+#TP8
+#Publicar Dockerfile Front
+#        - task: PublishPipelineArtifact@1
+#          displayName: 'Publicar Dockerfile de Front'
+#          inputs:
+#            targetPath: '$(Build.SourcesDirectory)/docker/front/dockerfile'
+#            artifact: 'dockerfile-front'
+
+
+- stage: Deploy
+  displayName: 'Deploy Site to QA'
+  dependsOn: Build
+  condition: succeeded()
+  jobs:
+   # Job para el Back-End
+  - job: DeployQABack
+    displayName: 'Deploy QA Back'
+    steps:
+    - task: DownloadPipelineArtifact@2
+      displayName: 'Download Build Artifacts'
+      inputs:
+        buildType: 'current'
+        artifactName: 'Back'
+        targetPath: '$(Pipeline.Workspace)/Back'
+    - task: AzureWebApp@1
+      displayName: 'Deploy QA Back'
+      inputs:
+          azureSubscription: 'Azure subscription 1 (cf3143c7-3323-4d8e-8441-634cb7757e78)'
+          appType: 'webApp'
+          appName: 'FGEmployeeCrudAPI-QA-Back'
+          package: '$(Pipeline.Workspace)/Back'
+          deploymentMethod: 'auto'
+ 
+  # Job para el Front-End
+  - job: DeployQAFront
+    displayName: 'Deploy QA Frontend'
+    steps:
+    - task: DownloadPipelineArtifact@2
+      displayName: 'Download Build Artifacts'
+      inputs:
+        buildType: 'current'
+        artifactName: 'Front'
+        targetPath: '$(Pipeline.Workspace)/Front'
+    
+    - task: AzureWebApp@1
+      displayName: 'Deploy QA Frontend'
+      inputs:
+        azureSubscription: 'Azure subscription 1 (cf3143c7-3323-4d8e-8441-634cb7757e78)'
+        appType: 'webApp'
+        appName: 'FGEmployeesCrudAPI-QA-Front'
+        package: '$(Pipeline.Workspace)/Front/employee-crud-angular/browser'
+        deploymentMethod: 'auto'
+  
+  # Job para los Test de Integración
+  - job: RunCypressTests
+    displayName: 'Tests de Integracion (Cypress Tests)'
+    dependsOn: [DeployQABack, DeployQAFront]
+    condition: succeeded()
+    steps:
+      - script: npm install ts-node typescript --save-dev
+        displayName: 'Install TypeScript'
+        workingDirectory: $(System.DefaultWorkingDirectory)/EmployeeCrudAngular
+
+      - script: npx cypress run
+        workingDirectory: $(System.DefaultWorkingDirectory)/EmployeeCrudAngular
+        displayName: 'Correr Tests en Cypress E2E'
+        continueOnError: true
+      - task: PublishTestResults@2
+        displayName: 'Publicar Resultados de Cypress'
+        inputs:
+          testResultsFiles: '$(Build.SourcesDirectory)/EmployeeCrudAngular/cypress/results/*.xml'
+          testRunTitle: 'Cypress E2E Tests - QA'
+          failTaskOnFailedTests: true
