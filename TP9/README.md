@@ -76,13 +76,26 @@
 	
 - ![alt text](imagenes/10.png)
 - ![alt text](imagenes/9.png)
+- ![alt text](imagenes/13.png)
+
 
 - 4.2.2 Agregar variables necesarias para el funcionamiento de la nueva etapa considerando que debe haber 2 entornos QA y PROD para Back y Front.
 - ![alt text](imagenes/11.png)
 - ![alt text](imagenes/12.png)
 
 - 4.2.3 Agregar tareas para correr pruebas de integración en el entorno de QA de Back y Front creado en Azure App Services con Soporte para Contenedores. 
+- ![alt text](imagenes/14.png)
+- ![alt text](imagenes/15.png)
+
 - 4.2.4 Agregar etapa que dependa de la etapa de Deploy en QA que genere un entorno de PROD.
+- ![alt text](imagenes/16.png)
+- ![alt text](imagenes/17.png)
+- ![alt text](imagenes/18.png)
+- ![alt text](imagenes/19.png)
+- ![alt text](imagenes/20.png)
+- ![alt text](imagenes/21.png)
+- 
+
 - 4.2.5 Entregar un pipeline que incluya:
   - A) Etapa Construcción y Pruebas Unitarias y Code Coverage Back y Front
   - B) Construcción de Imágenes Docker y subida a ACR
@@ -93,6 +106,9 @@
   - G) Deploy Back y Front en PROD para Azure Web Apps
   - H) Deploy Back y Front en PROD para ACI
   - I) Deploy Back y Front en PROD para Azure Web Apps con Soporte para contenedores
+
+- Pipeline Completo: (Link: https://dev.azure.com/fgazzera/Sample02/_build/results?buildId=199&view=results)
+- ![alt text](imagenes/00.png)
 
 ### 6-  Presentación del trabajo práctico.
 - Subir un doc al repo de GitHub con las capturas de pantalla de los pasos realizados. Debe ser un documento (md, word, o pdf), no videos. Y el documento debe seguir los pasos indicados en el Desarrollo del TP.

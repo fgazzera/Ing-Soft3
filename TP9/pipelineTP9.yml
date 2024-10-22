@@ -49,7 +49,7 @@
     # App Service Container
     AppServicePlanLinux: 'MiAppServicePlan'
     WebAppApiNameContainersQA: 'container-fgemployeecrudapi-back-web'
-    WebAppFrontNameContainersQA: 'fgemployeecrudapi-front-web'
+    WebAppFrontNameContainersQA: 'container-fgemployeecrudapi-front-web'
     
     # Back App Service Prod Container
     backWebContainerInstanceNameProd: 'fgemployeecrudapi-prod-back-asc-cactemhqd4ace8gs'
@@ -65,15 +65,13 @@
     # AzureContainerInstance_PROD_URL: 'http://fgemployeecrudapi-back-prod.brazilsouth.azurecontainer.io/api/Employee'
     
     # AppServiceContainer_QA_URL: 'https://container-fgemployeecrudapi-back-web.azurewebsites.net/api/Employee'
-    # AppServiceContainer_PROD_URL: 'https://fgemployeecrudapi-prod-back-asc-cactemhqd4ace8gs.brazilsouth-01.azurewebsites.net/api/Employee'
+    # : 'https://fgemployeecrudapi-prod-back-asc-cactemhqd4ace8gs.brazilsouth-01.azurewebsites.net/api/Employee'
     
     #URLs
     WAS-Base-URL: 'https://fgemployeescrudapi-qa-front.azurewebsites.net'
     ACI-Base-URL: 'http://fgemployeecrudapi-qa-front.brazilsouth.azurecontainer.io'
-    ASC-Base-URL: 'https://fgemployeecrudapi-front-web.azurewebsites.net'
-
-
-
+    ASC-Base-URL: 'https://container-fgemployeecrudapi-front-web.azurewebsites.net'
+    
 #Etapa de Build
   stages:
   - stage: Build
@@ -556,7 +554,7 @@
                   azureSubscription: 'Azure subscription 1 (cf3143c7-3323-4d8e-8441-634cb7757e78)'
                   appType: 'webApp'
                   appName: '$(backWebAppNamePROD)'
-                  package: '$(Pipeline.Workspace)/Back/*.zip'
+                  package: '$(Pipeline.Workspace)/Back'
                   deploymentMethod: 'auto'
 
 #----------------------------------------------------------
@@ -798,9 +796,9 @@
                         --cpu $(container-cpu-front-prod) \
                         --memory $(container-memory-front-prod)
 
-  #---------------------------------------
-  ### STAGE DEPLOY TO AZURE APP SERVICE QA
-  #---------------------------------------
+  #-------------------------------------------------------------------------------------------------
+  ######    ETAPA DE DEPLOY A QA - AZURE APP SERVICES CONTAINER - BACK Y FRONT    ######
+  #------------------------------------------------------------------------------------------------- 
   - stage: DeployImagesToAppServiceQA
     displayName: 'Desplegar Imagenes en Azure App Service (QA)'
     dependsOn: 
@@ -808,16 +806,17 @@
     - DockerBuildAndPush
     condition: succeeded()
     jobs:
-      - job: DeployImagesToAppServiceQA
-        displayName: 'Desplegar Imagenes de Back y Front en Azure App Service (QA)'
+      - job: DeployQABack
+        displayName: 'DEPLOY a QA - Back'
         pool:
           vmImage: 'ubuntu-latest'
         steps:
-          #------------------------------------------------------
-          # DEPLOY DOCKER API IMAGE TO AZURE APP SERVICE (QA)
-          #------------------------------------------------------
+
+  #-----------------------------------------------------------
+  ######          DEPLOY A QA PARA EL BACK END          ######
+  #----------------------------------------------------------- 
           - task: AzureCLI@2
-            displayName: 'Verificar y crear el recurso Azure App Service para Back (QA) si no existe'
+            displayName: 'Crear o Actualizar Back'
             inputs:
               azureSubscription: '$(ConnectedServiceName)'
               scriptType: 'bash'
@@ -841,11 +840,14 @@
                 az webapp config appsettings set --name $(WebAppApiNameContainersQA) --resource-group $(ResourceGroupName) \
                   --settings ConnectionStrings__DefaultConnection="$(cnn_string_qa)" \
 
-          #------------------------------------------------------
-          # DEPLOY DOCKER FRONT IMAGE TO AZURE APP SERVICE (QA)
-          #------------------------------------------------------
+  #------------------------------------------------------------
+  ######          DEPLOY A QA PARA EL FRONT END          ######
+  #------------------------------------------------------------ 
+      - job: DeployQAFront
+        displayName: 'DEPLOY a QA - Front'
+        steps:
           - task: AzureCLI@2
-            displayName: 'Verificar y crear el recurso Azure App Service para API Front si no existe'
+            displayName: 'Crear o Actualizar Front'
             inputs:
               azureSubscription: '$(ConnectedServiceName)'
               scriptType: 'bash'
@@ -869,33 +871,38 @@
                 az webapp config appsettings set --name $(WebAppFrontNameContainersQA) --resource-group $(ResourceGroupName) \
                   --settings API_URL="$(AppServiceContainer_QA_URL)" \
 
-#----------------------------------------------------------
-######           TESTS DE INTEGRACION EN QA          ######
-#---------------------------------------------------------- 
-      # Job para los Test de Integración
+  #----------------------------------------------------------
+  ######           TESTS DE INTEGRACION EN QA          ######
+  #---------------------------------------------------------- 
+    
       - job: IntegrationTests
         displayName: 'Tests de Integracion'
-        dependsOn: 
-          - DeployImagesToAppServiceQA
+        dependsOn:
+        - DeployQABack
+        - DeployQAFront
+      
         variables:
           baseUrl: '$(ASC-Base-URL)'
 
         steps:
         - script: npm install typescript ts-node
-          workingDirectory: ./EmployeeCrudAngular
+          workingDirectory: $(Build.SourcesDirectory)/EmployeeCrudAngular
           displayName: 'Instalar TypeScript'
 
         - script: npx cypress run --config-file cypress.config.ts --env baseUrl=$(baseUrl)
-          workingDirectory: ./EmployeeCrudAngular
-          displayName: 'Correr Tests en Cypress E2E'
+          workingDirectory: $(Build.SourcesDirectory)/EmployeeCrudAngular
+          displayName: 'Correr Tests en Cypress'
+
         - task: PublishTestResults@2
-          displayName: 'Publicar Resultados de Cypress'
+          displayName: 'Publicar Resultados de Tests'
           inputs:
             testResultsFiles: '$(Build.SourcesDirectory)/EmployeeCrudAngular/cypress/results/*.xml'
-            testRunTitle: 'Cypress E2E Tests - QA'
             failTaskOnFailedTests: true
 
 
+#------------------------------------------------------------
+######         DEPLOY A PROD PARA ASC         ######
+#------------------------------------------------------------
   - stage: DeployToWebAppServicesPROD
     displayName: 'Desplegar Web de Back y Front en PROD'
     dependsOn: DeployImagesToAppServiceQA
