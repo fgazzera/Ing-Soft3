@@ -873,7 +873,8 @@
       # Job para los Test de Integración
       - job: IntegrationTests
         displayName: 'Tests de Integracion'
-        dependsOn: [DeployImagesToAppServiceQA]
+        dependsOn: 
+          - DeployImagesToAppServiceQA
         variables:
           baseUrl: '$(ASC-Base-URL)'
 

@@ -66,10 +66,21 @@
 3. Corremos el pipeline para crear el App Service:
 - ![alt text](imagenes/4.png)
 - ![alt text](imagenes/5.png)
+- ![alt text](imagenes/6.png)
 
 #### 4.2 Desafíos:
 - 4.2.1 Agregar tareas para generar Front en Azure App Service con Soporte para Contenedores
+	- ![alt text](imagenes/7.png)
+	- Creamos la siguiente variable en el Pipeline:
+		- ![alt text](imagenes/8.png)
+	
+- ![alt text](imagenes/10.png)
+- ![alt text](imagenes/9.png)
+
 - 4.2.2 Agregar variables necesarias para el funcionamiento de la nueva etapa considerando que debe haber 2 entornos QA y PROD para Back y Front.
+- ![alt text](imagenes/11.png)
+- ![alt text](imagenes/12.png)
+
 - 4.2.3 Agregar tareas para correr pruebas de integración en el entorno de QA de Back y Front creado en Azure App Services con Soporte para Contenedores. 
 - 4.2.4 Agregar etapa que dependa de la etapa de Deploy en QA que genere un entorno de PROD.
 - 4.2.5 Entregar un pipeline que incluya:
