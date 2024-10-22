@@ -1,45 +1,5 @@
 ## Trabajo Práctico 9 - Implementación de Contenedores en Azure Parte 2
 
-### 1- Objetivos de Aprendizaje
-
-Al finalizar esta sesión, los estudiantes serán capaces de:
-
-1. **Seleccionar el servicio de contenedores más adecuado para diferentes escenarios de despliegue en la nube.**
-2. **Configurar y utilizar Azure Container Registry (ACR) para almacenar imágenes Docker de manera segura.**
-3. **Automatizar la creación y gestión de recursos en Azure mediante scripts y comandos de Azure CLI.**
-4. **Utilizar variables y secretos de manera eficiente y segura en los pipelines de Azure DevOps.**
-5. **Desarrollar y ejecutar un pipeline CI/CD completo que incluya la construcción y despliegue de contenedores en Azure.**
-
-### 2- Unidad temática que incluye este trabajo práctico
-Este trabajo práctico corresponde a la unidad Nº: 2 (Libro Ingeniería de Software: Unidad 18)
-
-### 3- Consignas a desarrollar en el trabajo práctico:
-
-#### Conceptos generales y explicaciones de los mismos
-##### Servicios de Contenedores en Azure
-
-Azure ofrece una amplia variedad de servicios para desplegar y gestionar aplicaciones basadas en contenedores, cada uno adecuado para diferentes escenarios y niveles de complejidad. A continuación se detallan los principales servicios de contenedores que ofrece Azure:
-
----
-
-##### Azure Container Instances (ACI)
-- **Despliegue Rápido y Sencillo de Contenedores**  
-  Azure Container Instances es la opción más sencilla y rápida para desplegar contenedores en Azure. ACI permite ejecutar contenedores sin necesidad de gestionar servidores o infraestructuras complejas, lo que lo convierte en una excelente opción para tareas puntuales, desarrollo y pruebas. Además, ACI ofrece facturación por segundo, lo que lo hace muy rentable para cargas de trabajo de corta duración.
-
-**Caso de uso:**  
-Es ideal para procesamiento por lotes, cargas de trabajo eventuales o aplicaciones que no requieren orquestación avanzada ni alta disponibilidad.
-
----
-
-##### Azure App Services con Soporte para Contenedores
-- **Plataforma Gestionada para Aplicaciones Web y APIs en Contenedores**  
-  Azure App Services es una plataforma gestionada para aplicaciones web y APIs que soporta contenedores Docker. Este servicio permite desplegar aplicaciones con alta disponibilidad sin necesidad de gestionar la infraestructura subyacente. Además, App Services ofrece escalabilidad automática, integración con pipelines de CI/CD y soporte para múltiples lenguajes de programación.
-
-**Caso de uso:**  
-Es ideal para aplicaciones web y APIs que requieren integración con otros servicios de Azure y que necesitan escalabilidad y alta disponibilidad sin preocuparse por la gestión de servidores.
-
----
-
 ### 4- Desarrollo:
 
 #### 4.1 Modificar nuestro pipeline para incluir el deploy en QA y PROD de Imagenes Docker en Servicio Azure App Services con Soporte para Contenedores
@@ -94,7 +54,19 @@ Es ideal para aplicaciones web y APIs que requieren integración con otros servi
 		                --settings ConnectionStrings__DefaultConnection="$(cnn-string-qa)" \
 	
   	  ```
-  	     
+
+1. Creamos el AppServicePlanLinux en Azure Portal  
+- ![alt text](imagenes/0.png)	  
+- ![alt text](imagenes/1.png)
+
+2. Creamos en el pipeline las siguientes variables:
+- ![alt text](imagenes/2.png)
+- ![alt text](imagenes/3.png)
+
+3. Corremos el pipeline para crear el App Service:
+- ![alt text](imagenes/4.png)
+- ![alt text](imagenes/5.png)
+
 #### 4.2 Desafíos:
 - 4.2.1 Agregar tareas para generar Front en Azure App Service con Soporte para Contenedores
 - 4.2.2 Agregar variables necesarias para el funcionamiento de la nueva etapa considerando que debe haber 2 entornos QA y PROD para Back y Front.

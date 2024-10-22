@@ -8,26 +8,36 @@
     nodeVersion: '20.x'
     configuration: 'Release'
     solution: '**/*.sln'
+
     ConnectedServiceName: 'ServiceConnectionARM' #Por ejemplo 'ServiceConnectionARM'
     acrLoginServer: 'fgingsoft3uccacr.azurecr.io' #Por ejemplo 'ascontainerregistry.azurecr.io'
     backImageName: 'employee-crud-api-back'
     frontImageName: 'employee-crud-api-front'
     ResourceGroupName: 'TP05IngSoft3UCC' #Por ejemplo 'TPS_INGSOFT3_UCC'
   
-    backContainerInstanceNameQA: 'fgemployeecrudapi-qa-back' #Por ejemplo 'as-crud-api-qa'
+    backWebAppNameQA: 'fgemployeecrudapi-qa-back' 
+    frontWebAppNameQA: 'FGEmployeesCrudAPI-QA-Front' 
+
+    backWebAppNamePROD: 'fgemployeecrudapi-prod-back-was'
+    frontWebAppNamePROD: 'FGEmployeesCrudAPI-PROD-Front'
+
+    # Variables AZURE CONTAINER INSTANCES -QA
+    backContainerInstanceNameQA: 'fgemployeecrudapi-qa-back-aci' #Por ejemplo 'as-crud-api-qa'
     backImageTag: 'latest' 
     container-cpu-api-qa: 1 #CPUS de nuestro container de QA
     container-memory-api-qa: 1.5 #RAM de nuestro container de QA
     
-    acrName: FGIngSoft3UCCACR
-    baseUrl: 'http://fgemployeecrudapi-qa-front.brazilsouth.azurecontainer.io'
-    
-    frontContainerInstanceNameQA: 'fgemployeecrudapi-qa-front'
+    # Variables AZURE CONTAINER INSTANCES - QA
+    frontContainerInstanceNameQA: 'fgemployeecrudapi-qa-front' 
     frontImageTag: 'latest'
     container-cpu-front-qa: 1
     container-memory-front-qa: 1.5
+
+    acrName: FGIngSoft3UCCACR
+    baseUrl: 'http://fgemployeecrudapi-qa-front.brazilsouth.azurecontainer.io'
     
-    #PROD
+
+    # Variables AZURE CONTAINER INSTANCES - PROD
     backContainerInstanceNameProd: 'fgemployeecrudapi-back-prod'
     frontContainerInstanceNameProd: 'fgemployeecrudapi-front-prod'
     container-cpu-api-prod: 1
@@ -35,11 +45,45 @@
     container-cpu-front-prod: 1
     container-memory-front-prod: 1.5
 
+    #CONTAINER
+    # App Service Container
+    AppServicePlanLinux: 'MiAppServicePlan'
+    WebAppApiNameContainersQA: 'container-fgemployeecrudapi-back-web'
+    WebAppFrontNameContainersQA: 'fgemployeecrudapi-front-web'
+    
+    # Back App Service Prod Container
+    backWebContainerInstanceNameProd: 'fgemployeecrudapi-prod-back-asc-cactemhqd4ace8gs'
+
+    # Front App Service Prod Container
+    frontWebContainerInstanceNameProd: 'fgemployeecrudapi-front-web-prod'
+
+    #Variables en Pipeline
+    # WebAppService_QA_URL: 'https://fgemployeecrudapi-qa-back.azurewebsites.net/api/Employee'
+    # WebAppService_PROD_URL: 'https://fgemployeecrudapi-prod-back-was.azurewebsites.net/api/Employee'
+    
+    # AzureContainerInstance_QA_URL: 'http://fgemployeecrudapi-qa-back.brazilsouth.azurecontainer.io/api/Employee'
+    # AzureContainerInstance_PROD_URL: 'http://fgemployeecrudapi-back-prod.brazilsouth.azurecontainer.io/api/Employee'
+    
+    # AppServiceContainer_QA_URL: 'https://container-fgemployeecrudapi-back-web.azurewebsites.net/api/Employee'
+    # AppServiceContainer_PROD_URL: 'https://fgemployeecrudapi-prod-back-asc-cactemhqd4ace8gs.brazilsouth-01.azurewebsites.net/api/Employee'
+    
+    #URLs
+    WAS-Base-URL: 'https://fgemployeescrudapi-qa-front.azurewebsites.net'
+    ACI-Base-URL: 'http://fgemployeecrudapi-qa-front.brazilsouth.azurecontainer.io'
+    ASC-Base-URL: 'https://fgemployeecrudapi-front-web.azurewebsites.net'
+
+
+
+#Etapa de Build
   stages:
   - stage: Build
     displayName: 'Build and Test'
     jobs:
-      # Job para el Back-End
+
+#---------------------------------------------------------
+######       BUILD Y ANALISIS PARA EL BACK END      ######
+#--------------------------------------------------------- 
+      # Job para el Back
       - job: BuildBackJob
         displayName: 'Build Back and Unit Tests'
         steps:
@@ -54,28 +98,28 @@
               projects: '$(solution)'
 
           # Ejecutar pruebas del back-end
-          - task: DotNetCoreCLI@2
-            displayName: 'Ejecutar pruebas de la API'
-            inputs:
-              command: 'test'
-              projects: '**/*.Tests.csproj'
-              arguments: '--collect:"XPlat Code Coverage"'
+          #- task: DotNetCoreCLI@2
+          #  displayName: 'Ejecutar pruebas de la API'
+          #  inputs:
+          #    command: 'test'
+          #    projects: '**/*.Tests.csproj'
+          #    arguments: '--collect:"XPlat Code Coverage"'
 
           # Preparación de SonarCloud para el backend
-          - task: SonarCloudPrepare@2
-            inputs:
-              SonarCloud: 'SonarCloud'
-              organization: 'fgazzera'
-              scannerMode: 'MSBuild'
-              projectKey: 'fgazzera_TP7_AngularAPI_Back'
-              projectName: 'TP7_AngularAPI_Back'
-            displayName: 'Preparación SonarCloud para Back'
+          #- task: SonarCloudPrepare@2
+          #  inputs:
+          #    SonarCloud: 'SonarCloud'
+          #    organization: 'fgazzera'
+          #    scannerMode: 'MSBuild'
+          #    projectKey: 'fgazzera_TP7_AngularAPI_Back'
+          #    projectName: 'TP7_AngularAPI_Back'
+          #  displayName: 'Preparación SonarCloud para Back'
 
-          - task: PublishCodeCoverageResults@2
-            inputs:
-              summaryFileLocation: '$(Agent.TempDirectory)/**/*.cobertura.xml'
-              failIfCoverageEmpty: false
-            displayName: 'Publicar resultados de code coverage del back-end'
+          #- task: PublishCodeCoverageResults@2
+          #  inputs:
+          #    summaryFileLocation: '$(Agent.TempDirectory)/**/*.cobertura.xml'
+          #    failIfCoverageEmpty: false
+          #  displayName: 'Publicar resultados de code coverage del back-end'
 
           # Compilar la solución del back-end
           - task: DotNetCoreCLI@2
@@ -86,17 +130,16 @@
               arguments: '--configuration $(configuration) --output $(buildOutput)/api  --self-contained false'
 
           # Análisis de SonarCloud para el backend
-          - task: SonarCloudAnalyze@2
-            inputs:
-              jdkversion: 'JAVA_HOME_17_X64'
-            displayName: 'Análisis SonarCloud del Back'
+          #- task: SonarCloudAnalyze@2
+          #  inputs:
+          #    jdkversion: 'JAVA_HOME_17_X64'
+          #  displayName: 'Análisis SonarCloud del Back'
 
           # Publicar Analisis de SonarCloud
-          - task: SonarCloudPublish@2
-            inputs:
-              pollingTimeoutSec: '300'
-            displayName: 'Publicación resultados de SonarCloud del Back'
-
+          #- task: SonarCloudPublish@2
+          #  inputs:
+          #    pollingTimeoutSec: '300'
+          #  displayName: 'Publicación resultados de SonarCloud del Back'
 
           # Publicar Back-End
           - task: DotNetCoreCLI@2
@@ -115,7 +158,6 @@
               ArtifactName: 'Back'
               publishLocation: 'Container'
         
-          #TP8
           # Publicar Dockerfile de Back
           - task: PublishPipelineArtifact@1
             displayName: 'Publicar Dockerfile de Back'
@@ -123,9 +165,12 @@
               targetPath: '$(Build.SourcesDirectory)/docker/api/dockerfile'
               artifact: 'dockerfile-back'
 
-      # Job para el Front-End
+#----------------------------------------------------------
+######       BUILD Y ANALISIS PARA EL FRONT END      ######
+#---------------------------------------------------------- 
+      # Job para el Front
       - job: BuildFrontJob
-        displayName: 'Build y Test del Front-End'
+        displayName: 'Build y Test del Front'
         steps:
           - checkout: self
             fetchDepth: 0
@@ -150,41 +195,41 @@
             workingDirectory: $(System.DefaultWorkingDirectory)/EmployeeCrudAngular
 
           # Tarea de SonarCloud pre Build
-          - task: SonarCloudPrepare@2
-            displayName: 'Preparar SonarCloud para Front-End'
-            inputs:
-              SonarCloud: 'SonarCloud'
-              organization: 'fgazzera'
-              scannerMode: 'CLI'
-              configMode: manual
-              cliProjectKey: 'fgazzera_TP7_AngularAPI_Front'
-              cliProjectName: 'TP7_AngularAPI_Front'
-              cliSources: '$(Build.SourcesDirectory)/EmployeeCrudAngular'
-              extraProperties: |
-                sonar.projectBaseDir=$(Build.SourcesDirectory)/EmployeeCrudAngular
+          #- task: SonarCloudPrepare@2
+          #  displayName: 'Preparar SonarCloud para Front-End'
+          #  inputs:
+          #    SonarCloud: 'SonarCloud'
+          #    organization: 'fgazzera'
+          #    scannerMode: 'CLI'
+          #    configMode: manual
+          #    cliProjectKey: 'fgazzera_TP7_AngularAPI_Front'
+          #    cliProjectName: 'TP7_AngularAPI_Front'
+          #    cliSources: '$(Build.SourcesDirectory)/EmployeeCrudAngular'
+          #    extraProperties: |
+          #      sonar.projectBaseDir=$(Build.SourcesDirectory)/EmployeeCrudAngular
 
           # Ejecutar pruebas del front-end
-          - script: npx ng test --karma-config=karma.conf.js --watch=false --browsers ChromeHeadless --code-coverage
-            displayName: 'Ejecutar pruebas del front'
-            workingDirectory: $(System.DefaultWorkingDirectory)/EmployeeCrudAngular
-            continueOnError: true
+          #- script: npx ng test --karma-config=karma.conf.js --watch=false --browsers ChromeHeadless --code-coverage
+          #  displayName: 'Ejecutar pruebas del front'
+          #  workingDirectory: $(System.DefaultWorkingDirectory)/EmployeeCrudAngular
+          #  continueOnError: true
 
           # Publicación de resultados de cobertura de código del frontend
-          - task: PublishCodeCoverageResults@2
-            inputs:
-              summaryFileLocation: '$(System.DefaultWorkingDirectory)/EmployeeCrudAngular/coverage/lcov.info'
-              failIfCoverageEmpty: false
-            condition: always()
-            displayName: 'Publicar resultados de code coverage del front'
+          #- task: PublishCodeCoverageResults@2
+          #  inputs:
+          #    summaryFileLocation: '$(System.DefaultWorkingDirectory)/EmployeeCrudAngular/coverage/lcov.info'
+          #    failIfCoverageEmpty: false
+          #  condition: always()
+          #  displayName: 'Publicar resultados de code coverage del front'
 
           # Publicación de resultados de pruebas unitarias del frontend
-          - task: PublishTestResults@2
-            inputs:
-              testResultsFormat: 'JUnit'
-              testResultsFiles: '$(System.DefaultWorkingDirectory)/EmployeeCrudAngular/test-results/test-results.xml'
-              failTaskOnFailedTests: true
-            condition: always()
-            displayName: 'Publicar resultados de pruebas unitarias del front'
+          #- task: PublishTestResults@2
+          #  inputs:
+          #    testResultsFormat: 'JUnit'
+          #    testResultsFiles: '$(System.DefaultWorkingDirectory)/EmployeeCrudAngular/test-results/test-results.xml'
+          #    failTaskOnFailedTests: true
+          #  condition: always()
+          #  displayName: 'Publicar resultados de pruebas unitarias del front'
 
           # Compilar el front-end
           - script: npx ng build --configuration production
@@ -193,16 +238,16 @@
             condition: succeeded()
 
           # Analisis de SonarCloud del front-end
-          - task: SonarCloudAnalyze@2
-            displayName: 'Analisis de SonarCloud del Front-End'
-            inputs:
-              jdkversion: 'JAVA_HOME_17_X64'
+          #- task: SonarCloudAnalyze@2
+          #  displayName: 'Analisis de SonarCloud del Front-End'
+          #  inputs:
+          #    jdkversion: 'JAVA_HOME_17_X64'
 
-          # Publicar resultados de SonarCloud del front-end
-          - task: SonarCloudPublish@2
-            displayName: 'Publicar resultados de SonarCloud del Front-End'
-            inputs:
-              pollingTimeoutSec: '300'
+          ## Publicar resultados de SonarCloud del front-end
+          #- task: SonarCloudPublish@2
+          #  displayName: 'Publicar resultados de SonarCloud del Front-End'
+          #  inputs:
+          #    pollingTimeoutSec: '300'
 
           # Publicación de artefactos del frontend
           - task: PublishBuildArtifacts@1
@@ -212,99 +257,32 @@
               ArtifactName: 'Front'
               publishLocation: 'Container'
 
-  #TP8
-  #Publicar Dockerfile Front
+          #Publicar Dockerfile Front
           - task: PublishPipelineArtifact@1
             displayName: 'Publicar Dockerfile de Front'
             inputs:
               targetPath: '$(Build.SourcesDirectory)/docker/front/dockerfile'
               artifact: 'dockerfile-front'
 
-
-  - stage: Deploy
-    displayName: 'Deploy Site to QA'
-    dependsOn: Build
-    condition: succeeded()
-    jobs:
-    # Job para el Back-End
-    - job: DeployQABack
-      displayName: 'Deploy QA Back'
-      steps:
-      - task: DownloadPipelineArtifact@2
-        displayName: 'Download Build Artifacts'
-        inputs:
-          buildType: 'current'
-          artifactName: 'Back'
-          targetPath: '$(Pipeline.Workspace)/Back'
-      - task: AzureWebApp@1
-        displayName: 'Deploy QA Back'
-        inputs:
-            azureSubscription: 'Azure subscription 1 (cf3143c7-3323-4d8e-8441-634cb7757e78)'
-            appType: 'webApp'
-            appName: 'FGEmployeeCrudAPI-QA-Back'
-            package: '$(Pipeline.Workspace)/Back'
-            deploymentMethod: 'auto'
-  
-    # Job para el Front-End
-    - job: DeployQAFront
-      displayName: 'Deploy QA Frontend'
-      steps:
-      - task: DownloadPipelineArtifact@2
-        displayName: 'Download Build Artifacts'
-        inputs:
-          buildType: 'current'
-          artifactName: 'Front'
-          targetPath: '$(Pipeline.Workspace)/Front'
-      
-      - task: AzureWebApp@1
-        displayName: 'Deploy QA Frontend'
-        inputs:
-          azureSubscription: 'Azure subscription 1 (cf3143c7-3323-4d8e-8441-634cb7757e78)'
-          appType: 'webApp'
-          appName: 'FGEmployeesCrudAPI-QA-Front'
-          package: '$(Pipeline.Workspace)/Front'
-          deploymentMethod: 'auto'
-    
-    # Job para los Test de Integración
-    - job: RunCypressTests
-      displayName: 'Tests de Integracion (Cypress Tests)'
-      dependsOn: [DeployQABack, DeployQAFront]
-      condition: succeeded()
-      steps:
-        - script: npm install ts-node typescript --save-dev
-          displayName: 'Install TypeScript'
-          workingDirectory: $(System.DefaultWorkingDirectory)/EmployeeCrudAngular
-
-        - script: npx cypress run --config-file cypress.config.ts --env baseUrl=$(baseUrl)
-          workingDirectory: $(System.DefaultWorkingDirectory)/EmployeeCrudAngular
-          displayName: 'Correr Tests en Cypress'
-          continueOnError: true
-        - task: PublishTestResults@2
-          displayName: 'Publicar Resultados de Cypress'
-          inputs:
-            testResultsFiles: '$(Build.SourcesDirectory)/EmployeeCrudAngular/cypress/results/*.xml'
-            testRunTitle: 'Cypress Tests - QA'
-            failTaskOnFailedTests: true
-
-  #----------------------------------------------------------
-  ### STAGE BUILD DOCKER IMAGES Y PUSH A AZURE CONTAINER REGISTRY
-  #----------------------------------------------------------
+#----------------------------------------------------------------------------
+######  ETAPA DE BUILD IMAGENES DE DOCKER Y PUSH A ACR - BACK Y FRONT  ######
+#---------------------------------------------------------------------------- 
 
   - stage: DockerBuildAndPush
     displayName: 'Construir y Subir Imágenes Docker a ACR'
     dependsOn: Build #NOMBRE DE NUESTRA ETAPA DE BUILD Y TEST
     jobs:
-      - job: docker_build_and_push
-        displayName: 'Construir y Subir Imágenes Docker a ACR'
+
+#----------------------------------------------------------
+######        BUILD DOCKER Y PUSH A ACR - BACK       ######
+#----------------------------------------------------------
+      - job: BuildBack
+        displayName: 'Construir y Subir Imágenes Docker Back - ACR'
         pool:
           vmImage: 'ubuntu-latest'
 
         steps:
         - checkout: self
-
-        #----------------------------------------------------------
-        # BUILD DOCKER BACK IMAGE Y PUSH A AZURE CONTAINER REGISTRY
-        #----------------------------------------------------------
 
         - task: DownloadPipelineArtifact@2
           displayName: 'Descargar Artefactos de Back'
@@ -345,66 +323,304 @@
             repository: $(acrLoginServer)/$(backImageName)
             tags: 'latest'
 
-  #----------------------------------------------------------
-  # BUILD DOCKER FRONT IMAGE Y PUSH A AZURE CONTAINER REGISTRY
-  #----------------------------------------------------------
+#----------------------------------------------------------
+######       BUILD DOCKER Y PUSH A ACR - FRONT       ######
+#----------------------------------------------------------
+      - job: BuildFront
+        displayName: 'BUILD y PUSH DOCKER - Front'
+        pool:
+          vmImage: 'ubuntu-latest'
 
-        - task: DownloadPipelineArtifact@2
-          displayName: 'Descargar Artefactos de Front'
+        steps:
+          - checkout: self
+
+          - task: DownloadPipelineArtifact@2
+            displayName: 'Descargar Artefactos de Front'
+            inputs:
+              buildType: 'current'
+              artifactName: 'Front'
+              targetPath: '$(Pipeline.Workspace)/Front'
+
+          - task: DownloadPipelineArtifact@2
+            displayName: 'Descargar Dockerfile de Front'
+            inputs:
+              buildType: 'current'
+              artifactName: 'dockerfile-front'
+              targetPath: '$(Pipeline.Workspace)/dockerfile-front'
+
+          - task: AzureCLI@2
+            displayName: 'Iniciar Sesión en Azure Container Registry (ACR)'
+            inputs:
+              azureSubscription: '$(ConnectedServiceName)'
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                az acr login --name $(acrLoginServer)
+
+          - task: Docker@2
+            displayName: 'Construir Imagen Docker para Front'
+            inputs:
+              command: build
+              repository: $(acrLoginServer)/$(frontImageName)
+              dockerfile: $(Pipeline.Workspace)/dockerfile-front/dockerfile
+              buildContext: $(Pipeline.Workspace)/Front
+              tags: 'latest'
+              
+          - task: Docker@2
+            displayName: 'Subir Imagen Docker de Front a ACR'
+            inputs:
+              command: push
+              repository: $(acrLoginServer)/$(frontImageName)
+              tags: 'latest'
+
+#---------------------------------------------------------------------------
+######     ETAPA DE DEPLOY A QA - WEB APP SERVICES - BACK Y FRONT     ######
+#--------------------------------------------------------------------------- 
+
+  - stage: DeployAWA_QA
+    displayName: 'Deploy Site to QA'
+    dependsOn: Build
+    condition: succeeded()
+    jobs:
+
+#----------------------------------------------------------
+######          DEPLOY A QA PARA EL BACK END         ######
+#---------------------------------------------------------- 
+    # Job para el Back
+    - job: DeployQABack
+      displayName: 'Deploy To QA Back'
+      steps:
+      - task: DownloadPipelineArtifact@2
+        displayName: 'Download Build Artifacts'
+        inputs:
+          buildType: 'current'
+          artifactName: 'Back'
+          targetPath: '$(Pipeline.Workspace)/Back'
+
+     # Establecer variables de entorno para el Backend (TP9)
+      - task: AzureCLI@2
+        displayName: 'Verificar y crear el recurso Azure App Service para Back si no existe'
+        inputs:
+          azureSubscription: 'Azure subscription 1 (cf3143c7-3323-4d8e-8441-634cb7757e78)'
+          scriptType: 'bash'
+          scriptLocation: 'inlineScript'
+          inlineScript: |
+            set -e
+
+            echo "Verificando si el App Service existe..."
+            az webapp show --name "$(backWebAppNameQA)" --resource-group "TP07IngSoft3UCC" || {
+                echo "El App Service no existe. Creando uno nuevo..."
+                az webapp create --resource-group "TP07IngSoft3UCC" --plan "MiPlanTP05" --name $(backWebAppNameQA) --runtime "DOTNET|6.0"
+            }
+
+            az webapp config appsettings set --name $(backWebAppNameQA) --resource-group "TP07IngSoft3UCC" \
+              --settings ConnectionStrings__DefaultConnection="$(cnn_string_qa)" \
+    
+      - task: AzureWebApp@1
+        displayName: 'Deploy QA Back (ARTEFACTOS)'
+        inputs:
+            azureSubscription: 'Azure subscription 1 (cf3143c7-3323-4d8e-8441-634cb7757e78)'
+            appType: 'webApp'
+            appName: '$(backWebAppNameQA)'
+            package: '$(Pipeline.Workspace)/Back'
+            deploymentMethod: 'auto'
+  
+#----------------------------------------------------------
+######         DEPLOY A QA PARA EL FRONT END         ######
+#---------------------------------------------------------- 
+    # Job para el Front-End
+    - job: DeployQAFront
+      displayName: 'Deploy a AWA QA Frontend'
+      steps:
+      - task: DownloadPipelineArtifact@2
+        displayName: 'Download Build Artifacts'
+        inputs:
+          buildType: 'current'
+          artifactName: 'Front'
+          targetPath: '$(Pipeline.Workspace)/Front'
+
+      #(NUEVO TP9)
+      - task: PowerShell@2
+        displayName: 'Actualizar env.js con API_URL'
+        inputs:
+          targetType: 'inline'
+          script: |
+            Set-Content -Path "$(Pipeline.Workspace)/Front/assets/env.js" -Value "window['env'] = { apiUrl: '$(WebAppService_QA_URL)' };" ` -Force
+      
+       #(NUEVO TP9)
+      - task: AzureCLI@2
+        displayName: 'Verificar y crear el recurso Azure App Service para Front si no existe'
+        inputs:
+          azureSubscription: 'Azure subscription 1 (cf3143c7-3323-4d8e-8441-634cb7757e78)'
+          scriptType: 'bash'
+          scriptLocation: 'inlineScript'
+          inlineScript: |
+              set -e
+
+              echo "Verificando si el App Service existe..."
+              az webapp show --name "$(frontWebAppNameQA)" --resource-group "TP07IngSoft3UCC" || {
+                  echo "El App Service no existe. Creando uno nuevo..."
+                  az webapp create --resource-group "TP07IngSoft3UCC" --plan "MiPlanTP05" --name $(frontWebAppNameQA) --runtime "NODE|18LTS"
+              }
+
+              az webapp config appsettings set \
+                --name "$(frontWebAppNameQA)" \
+                --resource-group "TP07IngSoft3UCC" \
+                --settings API_URL="$(WebAppService_QA_URL)"
+
+      - task: AzureWebApp@1
+        displayName: 'Deploy QA Frontend (ARTEFACTOS)'
+        inputs:
+          azureSubscription: 'Azure subscription 1 (cf3143c7-3323-4d8e-8441-634cb7757e78)'
+          appType: 'webApp'
+          appName: '$(frontWebAppNameQA)'
+          package: '$(Pipeline.Workspace)/Front'
+          deploymentMethod: 'auto'
+    
+#----------------------------------------------------------
+######           TESTS DE INTEGRACION EN QA          ######
+#---------------------------------------------------------- 
+
+    # Job para los Test de Integración
+    - job: RunCypressTests
+      displayName: 'Tests de Integracion (Cypress Tests)'
+      dependsOn: [DeployQABack, DeployQAFront]
+      variables:
+        baseUrl: '$(WAS-Base-URL)'
+      steps:
+        - script: npm install ts-node typescript --save-dev
+          displayName: 'Install TypeScript'
+          workingDirectory: $(System.DefaultWorkingDirectory)/EmployeeCrudAngular
+
+        - script: npx cypress run --config-file cypress.config.ts --env baseUrl=$(baseUrl)
+          workingDirectory: $(System.DefaultWorkingDirectory)/EmployeeCrudAngular
+          displayName: 'Correr Tests en Cypress'
+          continueOnError: true
+
+        - task: PublishTestResults@2
+          displayName: 'Publicar Resultados de Cypress'
           inputs:
-            buildType: 'current'
-            artifactName: 'Front'
-            targetPath: '$(Pipeline.Workspace)/Front'
+            testResultsFiles: '$(Build.SourcesDirectory)/EmployeeCrudAngular/cypress/results/*.xml'
+            testRunTitle: 'Cypress Tests - QA'
+            failTaskOnFailedTests: true
 
-        - task: DownloadPipelineArtifact@2
-          displayName: 'Descargar Dockerfile de Front'
-          inputs:
-            buildType: 'current'
-            artifactName: 'dockerfile-front'
-            targetPath: '$(Pipeline.Workspace)/dockerfile-front'
+#---------------------------------------------------------------------------
+######    ETAPA DE DEPLOY A PROD - WEB APP SERVICES - BACK Y FRONT    ######
+#--------------------------------------------------------------------------- 
+  
+  - stage: DeployToAazureWebAppsPROD
+    displayName: 'Desplegar en Azure Web Apps PROD'
+    dependsOn: DeployAWA_QA
+    jobs:
+      - deployment: DeployToAazureWebAppsPROD
+        displayName: 'Deploy AWA PROD Back y Front'
+        environment: 'PROD'
+        
+        strategy:
+          runOnce:
+            deploy:
+              steps:
 
-        - task: AzureCLI@2
-          displayName: 'Iniciar Sesión en Azure Container Registry (ACR)'
-          inputs:
-            azureSubscription: '$(ConnectedServiceName)'
-            scriptType: bash
-            scriptLocation: inlineScript
-            inlineScript: |
-              az acr login --name $(acrLoginServer)
+#----------------------------------------------------------
+######        DEPLOY A PROD PARA EL BACK END         ######
+#---------------------------------------------------------- 
+              - task: DownloadPipelineArtifact@2
+                displayName: 'Download Build Artifacts'
+                inputs:
+                  buildType: 'current'
+                  artifactName: 'Back'
+                  targetPath: '$(Pipeline.Workspace)/Back'
 
-        - task: Docker@2
-          displayName: 'Construir Imagen Docker para Front'
-          inputs:
-            command: build
-            repository: $(acrLoginServer)/$(frontImageName)
-            dockerfile: $(Pipeline.Workspace)/dockerfile-front/dockerfile
-            buildContext: $(Pipeline.Workspace)/Front
-            tags: 'latest'
-            
-        - task: Docker@2
-          displayName: 'Subir Imagen Docker de Front a ACR'
-          inputs:
-            command: push
-            repository: $(acrLoginServer)/$(frontImageName)
-            tags: 'latest'
+            # Establecer variables de entorno para el Backend
+              - task: AzureCLI@2
+                displayName: 'Verificar y crear el recurso Azure App Service para Back si no existe'
+                inputs:
+                  azureSubscription: 'Azure subscription 1 (cf3143c7-3323-4d8e-8441-634cb7757e78)'
+                  scriptType: 'bash'
+                  scriptLocation: 'inlineScript'
+                  inlineScript: |
+                      set -e
 
-  #----------------------------------------------------------
-  ### STAGE DEPLOY TO ACI QA
-  #----------------------------------------------------------
+                      echo "Verificando si el App Service existe..."
+                      az webapp show --name "$(backWebAppNamePROD)" --resource-group "$(ResourceGroupName)" || {
+                          echo "El App Service no existe. Creando uno nuevo..."
+                          az webapp create --resource-group "$(ResourceGroupName)" --plan "MiPlanTP05" --name $(backWebAppNamePROD) --runtime "DOTNET|6.0"
+                      }
 
+                      az webapp config appsettings set --name $(backWebAppNamePROD) --resource-group "$(ResourceGroupName)" \
+                        --settings ConnectionStrings__DefaultConnection="$(cnn_string_prod)" \
+                
+              - task: AzureWebApp@1
+                displayName: 'Deploy to QA - Back-End'
+                inputs:
+                  azureSubscription: 'Azure subscription 1 (cf3143c7-3323-4d8e-8441-634cb7757e78)'
+                  appType: 'webApp'
+                  appName: '$(backWebAppNamePROD)'
+                  package: '$(Pipeline.Workspace)/Back/*.zip'
+                  deploymentMethod: 'auto'
+
+#----------------------------------------------------------
+######        DEPLOY A PROD PARA EL FRONT END        ######
+#---------------------------------------------------------- 
+              - task: DownloadPipelineArtifact@2
+                displayName: 'Download Build Artifacts'
+                inputs:
+                  buildType: 'current'
+                  artifactName: 'Front'
+                  targetPath: '$(Pipeline.Workspace)/Front'
+
+              - task: PowerShell@2
+                displayName: 'Actualizar env.js con API_URL'
+                inputs:
+                  targetType: 'inline'
+                  script: |
+                    Set-Content -Path "$(Pipeline.Workspace)/Front/assets/env.js" -Value "window['env'] = { apiUrl: '$(WebAppService_PROD_URL)' };" ` -Force
+
+              - task: AzureCLI@2
+                displayName: 'Verificar y crear el recurso Azure App Service para Front si no existe'
+                inputs:
+                  azureSubscription: 'Azure subscription 1 (cf3143c7-3323-4d8e-8441-634cb7757e78)'
+                  scriptType: 'bash'
+                  scriptLocation: 'inlineScript'
+                  inlineScript: |
+                      set -e
+
+                      echo "Verificando si el App Service existe..."
+                      az webapp show --name "$(frontWebAppNamePROD)" --resource-group "$(ResourceGroupName)" |F| {
+                          echo "El App Service no existe. Creando uno nuevo..."
+                          az webapp create --resource-group "$(ResourceGroupName)" --plan "MiPlanTP05" --name $(frontWebAppNamePROD) --runtime "NODE|18LTS"
+                      }
+
+                      az webapp config appsettings set \
+                        --name "$(frontWebAppNamePROD)" \
+                        --resource-group "$(ResourceGroupName)" \
+                        --settings API_URL="$(WebAppService_PROD_URL)"
+
+              - task: AzureWebApp@1
+                displayName: 'Deploy de Artefactos del Front'
+                inputs:
+                  azureSubscription: 'Azure subscription 1 (cf3143c7-3323-4d8e-8441-634cb7757e78)'
+                  appType: 'webApp'
+                  appName: '$(frontWebAppNamePROD)'
+                  package: '$(Pipeline.Workspace)/Front'
+                  deploymentMethod: 'auto'
+
+#----------------------------------------------------------------------------------
+######    ETAPA DE DEPLOY A QA - AZURE CONTAINER INSTANCES - BACK Y FRONT    ######
+#---------------------------------------------------------------------------------- 
   - stage: DeployToACIQA
     displayName: 'Desplegar en Azure Container Instances (ACI) QA'
     dependsOn: DockerBuildAndPush
     jobs:
-      - job: deploy_to_aci_qa
+      - job: DeployQA
         displayName: 'Desplegar en Azure Container Instances (ACI) QA'
         pool:
           vmImage: 'ubuntu-latest'
 
         steps:
-          #------------------------------------------------------
-          # DEPLOY DOCKER BACK IMAGE A AZURE CONTAINER INSTANCES QA
-          #------------------------------------------------------
+#----------------------------------------------------------
+######      DEPLOY IMAGEN DOCKER A ACI QA - BACK     ######
+#----------------------------------------------------------
           - task: AzureCLI@2
             displayName: 'Desplegar Imagen Docker de Back en ACI QA'
             inputs:
@@ -420,6 +636,7 @@
                 echo "Connection String: $(cnn_string_qa)"
             
                 az container delete --resource-group $(ResourceGroupName) --name $(backContainerInstanceNameQA) --yes
+
                 az container create --resource-group $(ResourceGroupName) \
                   --name $(backContainerInstanceNameQA) \
                   --image $(acrLoginServer)/$(backImageName):$(backImageTag) \
@@ -433,10 +650,9 @@
                   --cpu $(container-cpu-api-qa) \
                   --memory $(container-memory-api-qa)
 
-          #------------------------------------------------------
-          # DEPLOY DOCKER FRONT IMAGE A AZURE CONTAINER INSTANCES QA
-          #------------------------------------------------------
-
+#-----------------------------------------------------------
+######      DEPLOY IMAGEN DOCKER A ACI QA - FRONT     ######
+#-----------------------------------------------------------
           - task: AzureCLI@2
             displayName: 'Desplegar Imagen Docker de Front en ACI QA'
             inputs:
@@ -449,7 +665,7 @@
                 echo "ACR Login Server: $(acrLoginServer)"
                 echo "Image Name: $(frontImageName)"
                 echo "Image Tag: $(frontImageTag)"
-                echo "Api Url: $(container-url-api-qa)"
+                echo "Api Url: $(AzureContainerInstance_QA_URL)"
 
                 az container delete --resource-group $(ResourceGroupName) --name $(frontContainerInstanceNameQA) --yes
 
@@ -461,15 +677,19 @@
                   --registry-password $(az acr credential show --name $(acrName) --query "passwords[0].value" -o tsv) \
                   --dns-name-label $(frontContainerInstanceNameQA) \
                   --ports 80 \
-                  --environment-variables API_URL="$(container-url-api-qa)" \
+                  --environment-variables API_URL="$(AzureContainerInstance_QA_URL)" \
                   --restart-policy Always \
                   --cpu $(container-cpu-front-qa) \
                   --memory $(container-memory-front-qa)
+    
+#----------------------------------------------------------
+######           TESTS DE INTEGRACION EN QA          ######
+#---------------------------------------------------------- 
 
       - job: IntegrationTests
         displayName: 'Tests de Integracion'
         dependsOn:
-          - deploy_to_aci_qa
+          - DeployQA
         steps:
           - task: CmdLine@2
             displayName: 'Instalar TypeScript'
@@ -491,12 +711,12 @@
               failTaskOnFailedTests: true
 
   #------------------------------------------------------
-  # 4.2.4 DEPLOY EN ACI QA para entorno de PROD
+  # 4.4.4 DEPLOY EN ACI QA para entorno de PROD
   #------------------------------------------------------
 
-  #----------------------------------------------------------
-  ### STAGE DEPLOY TO ACI PROD
-  #----------------------------------------------------------
+#------------------------------------------------------------------------------------
+######    ETAPA DE DEPLOY A PROD - AZURE CONTAINER INSTANCES - BACK Y FRONT    ######
+#------------------------------------------------------------------------------------ 
   - stage: DeployToACIPROD
     displayName: 'Desplegar en Azure Container Instances PROD'
     dependsOn:
@@ -512,9 +732,9 @@
           runOnce:
             deploy:
               steps:
-                #----------------------------------------------------------
-                ### DEPLOY DOCKER BACK TO ACI PROD
-                #----------------------------------------------------------
+#-----------------------------------------------------------
+######         DEPLOY A PROD PARA EL BACK END         ######
+#----------------------------------------------------------- 
                 - task: AzureCLI@2
                   displayName: 'Desplegar Imagen Docker de Back en ACI PROD'
                   inputs:
@@ -544,9 +764,9 @@
                         --cpu $(container-cpu-api-prod) \
                         --memory $(container-memory-api-prod)
 
-                #----------------------------------------------------------
-                ### DEPLOY DOCKER FRONT TO ACI PROD
-                #----------------------------------------------------------
+#----------------------------------------------------------
+######        DEPLOY A PROD PARA EL FRONT END        ######
+#---------------------------------------------------------- 
                 - task: AzureCLI@2
                   displayName: 'Desplegar Imagen Docker de Front en ACI PROD'
                   inputs:
@@ -559,7 +779,7 @@
                       echo "ACR Login Server: $(acrLoginServer)"
                       echo "Image Name: $(frontImageName)"
                       echo "Image Tag: $(frontImageTag)"
-                      echo "Api Url: $(container-url-api-qa)"
+                      echo "Api Url: $(AzureContainerInstance_PROD_URL)"
 
                       az container delete --resource-group $(ResourceGroupName) --name $(frontContainerInstanceNameProd) --yes
 
@@ -571,7 +791,173 @@
                         --registry-password $(az acr credential show --name $(acrName) --query "passwords[0].value" -o tsv) \
                         --dns-name-label $(frontContainerInstanceNameProd) \
                         --ports 80 \
-                        --environment-variables API_URL="$(container-url-api-qa)" \
+                        --environment-variables API_URL="$(AzureContainerInstance_PROD_URL)" \
                         --restart-policy Always \
                         --cpu $(container-cpu-front-prod) \
                         --memory $(container-memory-front-prod)
+
+  #---------------------------------------
+  ### STAGE DEPLOY TO AZURE APP SERVICE QA
+  #---------------------------------------
+  - stage: DeployImagesToAppServiceQA
+    displayName: 'Desplegar Imagenes en Azure App Service (QA)'
+    dependsOn: 
+    - Build
+    - DockerBuildAndPush
+    condition: succeeded()
+    jobs:
+      - job: DeployImagesToAppServiceQA
+        displayName: 'Desplegar Imagenes de Back y Front en Azure App Service (QA)'
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          #------------------------------------------------------
+          # DEPLOY DOCKER API IMAGE TO AZURE APP SERVICE (QA)
+          #------------------------------------------------------
+          - task: AzureCLI@2
+            displayName: 'Verificar y crear el recurso Azure App Service para Back (QA) si no existe'
+            inputs:
+              azureSubscription: '$(ConnectedServiceName)'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                # Verificar si el App Service para la API ya existe
+                if ! az webapp list --query "[?name=='$(WebAppApiNameContainersQA)' && resourceGroup=='$(ResourceGroupName)'] | length(@)" -o tsv | grep -q '^1$'; then
+                  echo "El App Service para API QA no existe. Creando..."
+                    # Crear el App Service sin especificar la imagen del contenedor
+                  az webapp create --resource-group $(ResourceGroupName) --plan $(AppServicePlanLinux) --name $(WebAppApiNameContainersQA) --deployment-container-image-name "nginx"  # Especifica una imagen temporal para permitir la creación
+                else
+                  echo "El App Service para API QA ya existe. Actualizando la imagen..."
+                fi
+                  # Configurar el App Service para usar Azure Container Registry (ACR)
+                  az webapp config container set --name $(WebAppApiNameContainersQA) --resource-group $(ResourceGroupName) \
+                  --container-image-name $(acrLoginServer)/$(backImageName):$(backImageTag) \
+                  --container-registry-url https://$(acrLoginServer) \
+                  --container-registry-user $(acrName) \
+                  --container-registry-password $(az acr credential show --name $(acrName) --query "passwords[0].value" -o tsv)
+                # Establecer variables de entorno
+                az webapp config appsettings set --name $(WebAppApiNameContainersQA) --resource-group $(ResourceGroupName) \
+                  --settings ConnectionStrings__DefaultConnection="$(cnn_string_qa)" \
+
+          #------------------------------------------------------
+          # DEPLOY DOCKER FRONT IMAGE TO AZURE APP SERVICE (QA)
+          #------------------------------------------------------
+          - task: AzureCLI@2
+            displayName: 'Verificar y crear el recurso Azure App Service para API Front si no existe'
+            inputs:
+              azureSubscription: '$(ConnectedServiceName)'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                # Verificar si el App Service para la API ya existe
+                if ! az webapp list --query "[?name=='$(WebAppFrontNameContainersQA)' && resourceGroup=='$(ResourceGroupName)'] | length(@)" -o tsv | grep -q '^1$'; then
+                  echo "El App Service para Front QA no existe. Creando..."
+                    # Crear el App Service sin especificar la imagen del contenedor
+                  az webapp create --resource-group $(ResourceGroupName) --plan $(AppServicePlanLinux) --name $(WebAppFrontNameContainersQA) --deployment-container-image-name "nginx"  # Especifica una imagen temporal para permitir la creación
+                else
+                  echo "El App Service para Front QA ya existe. Actualizando la imagen..."
+                fi
+                  # Configurar el App Service para usar Azure Container Registry (ACR)
+                  az webapp config container set --name $(WebAppFrontNameContainersQA) --resource-group $(ResourceGroupName) \
+                  --container-image-name $(acrLoginServer)/$(frontImageName):$(frontImageTag) \
+                  --container-registry-url https://$(acrLoginServer) \
+                  --container-registry-user $(acrName) \
+                  --container-registry-password $(az acr credential show --name $(acrName) --query "passwords[0].value" -o tsv)
+                # Establecer variables de entorno
+                az webapp config appsettings set --name $(WebAppFrontNameContainersQA) --resource-group $(ResourceGroupName) \
+                  --settings API_URL="$(AppServiceContainer_QA_URL)" \
+
+#----------------------------------------------------------
+######           TESTS DE INTEGRACION EN QA          ######
+#---------------------------------------------------------- 
+      # Job para los Test de Integración
+      - job: IntegrationTests
+        displayName: 'Tests de Integracion'
+        dependsOn: [DeployImagesToAppServiceQA]
+        variables:
+          baseUrl: '$(ASC-Base-URL)'
+
+        steps:
+        - script: npm install typescript ts-node
+          workingDirectory: ./EmployeeCrudAngular
+          displayName: 'Instalar TypeScript'
+
+        - script: npx cypress run --config-file cypress.config.ts --env baseUrl=$(baseUrl)
+          workingDirectory: ./EmployeeCrudAngular
+          displayName: 'Correr Tests en Cypress E2E'
+        - task: PublishTestResults@2
+          displayName: 'Publicar Resultados de Cypress'
+          inputs:
+            testResultsFiles: '$(Build.SourcesDirectory)/EmployeeCrudAngular/cypress/results/*.xml'
+            testRunTitle: 'Cypress E2E Tests - QA'
+            failTaskOnFailedTests: true
+
+
+  - stage: DeployToWebAppServicesPROD
+    displayName: 'Desplegar Web de Back y Front en PROD'
+    dependsOn: DeployImagesToAppServiceQA
+    jobs:
+      - deployment: DeployACIPROD
+        displayName: 'Deploy Web App Services Prod - Back y Front'
+        pool:
+          vmImage: 'ubuntu-latest'
+        environment: 'PROD'  # Aquí especificamos el environment
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+#------------------------------------------------------------
+######         DEPLOY A PROD PARA EL BACK END         ######
+#------------------------------------------------------------ 
+                - task: AzureCLI@2
+                  displayName: 'Verificar y crear el recurso Azure App Service para API (PROD) si no existe'
+                  inputs:
+                    azureSubscription: '$(ConnectedServiceName)'
+                    scriptType: 'bash'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      # Verificar si el App Service para la API ya existe
+                      if ! az webapp list --query "[?name=='$(backWebContainerInstanceNameProd)' && resourceGroup=='$(ResourceGroupName)'] | length(@)" -o tsv | grep -q '^1$'; then
+                        echo "El App Service para API PROD no existe. Creando..."
+                          # Crear el App Service sin especificar la imagen del contenedor
+                        az webapp create --resource-group $(ResourceGroupName) --plan $(AppServicePlanLinux) --name $(backWebContainerInstanceNameProd) --deployment-container-image-name "nginx"  # Especifica una imagen temporal para permitir la creación
+                      else
+                        echo "El App Service para API PROD ya existe. Actualizando la imagen..."
+                      fi
+                        # Configurar el App Service para usar Azure Container Registry (ACR)
+                        az webapp config container set --name $(backWebContainerInstanceNameProd) --resource-group $(ResourceGroupName) \
+                        --container-image-name $(acrLoginServer)/$(backImageName):$(backImageTag) \
+                        --container-registry-url https://$(acrLoginServer) \
+                        --container-registry-user $(acrName) \
+                        --container-registry-password $(az acr credential show --name $(acrName) --query "passwords[0].value" -o tsv)
+                      # Establecer variables de entorno
+                      az webapp config appsettings set --name $(backWebContainerInstanceNameProd) --resource-group $(ResourceGroupName) \
+                        --settings ConnectionStrings__DefaultConnection="$(cnn_string_prod)" \
+
+#------------------------------------------------------------
+######         DEPLOY A PROD PARA EL FRONT END         ######
+#------------------------------------------------------------ 
+                - task: AzureCLI@2
+                  displayName: 'Verificar y crear el recurso Azure App Service para API Front si no existe'
+                  inputs:
+                    azureSubscription: '$(ConnectedServiceName)'
+                    scriptType: 'bash'
+                    scriptLocation: 'inlineScript'
+                    inlineScript: |
+                      # Verificar si el App Service para la API ya existe
+                      if ! az webapp list --query "[?name=='$(frontWebContainerInstanceNameProd)' && resourceGroup=='$(ResourceGroupName)'] | length(@)" -o tsv | grep -q '^1$'; then
+                        echo "El App Service para Front QA no existe. Creando..."
+                          # Crear el App Service sin especificar la imagen del contenedor
+                        az webapp create --resource-group $(ResourceGroupName) --plan $(AppServicePlanLinux) --name $(frontWebContainerInstanceNameProd) --deployment-container-image-name "nginx"  # Especifica una imagen temporal para permitir la creación
+                      else
+                        echo "El App Service para Front QA ya existe. Actualizando la imagen..."
+                      fi
+                        # Configurar el App Service para usar Azure Container Registry (ACR)
+                        az webapp config container set --name $(frontWebContainerInstanceNameProd) --resource-group $(ResourceGroupName) \
+                        --container-image-name $(acrLoginServer)/$(frontImageName):$(frontImageTag) \
+                        --container-registry-url https://$(acrLoginServer) \
+                        --container-registry-user $(acrName) \
+                        --container-registry-password $(az acr credential show --name $(acrName) --query "passwords[0].value" -o tsv)
+                      # Establecer variables de entorno
+                      az webapp config appsettings set --name $(frontWebContainerInstanceNameProd) --resource-group $(ResourceGroupName) \
+                        --settings API_URL="$(AppServiceContainer_PROD_URL)" \
