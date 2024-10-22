@@ -65,7 +65,7 @@
     # AzureContainerInstance_PROD_URL: 'http://fgemployeecrudapi-back-prod.brazilsouth.azurecontainer.io/api/Employee'
     
     # AppServiceContainer_QA_URL: 'https://container-fgemployeecrudapi-back-web.azurewebsites.net/api/Employee'
-    # : 'https://fgemployeecrudapi-prod-back-asc-cactemhqd4ace8gs.brazilsouth-01.azurewebsites.net/api/Employee'
+    # AppServiceContainer_PROD_URL: 'https://fgemployeecrudapi-prod-back-asc-cactemhqd4ace8gs.brazilsouth-01.azurewebsites.net/api/Employee'
     
     #URLs
     WAS-Base-URL: 'https://fgemployeescrudapi-qa-front.azurewebsites.net'
@@ -96,12 +96,12 @@
               projects: '$(solution)'
 
           # Ejecutar pruebas del back-end
-          #- task: DotNetCoreCLI@2
-          #  displayName: 'Ejecutar pruebas de la API'
-          #  inputs:
-          #    command: 'test'
-          #    projects: '**/*.Tests.csproj'
-          #    arguments: '--collect:"XPlat Code Coverage"'
+          - task: DotNetCoreCLI@2
+            displayName: 'Ejecutar pruebas de la API'
+            inputs:
+              command: 'test'
+              projects: '**/*.Tests.csproj'
+              arguments: '--collect:"XPlat Code Coverage"'
 
           # Preparación de SonarCloud para el backend
           #- task: SonarCloudPrepare@2
@@ -113,11 +113,11 @@
           #    projectName: 'TP7_AngularAPI_Back'
           #  displayName: 'Preparación SonarCloud para Back'
 
-          #- task: PublishCodeCoverageResults@2
-          #  inputs:
-          #    summaryFileLocation: '$(Agent.TempDirectory)/**/*.cobertura.xml'
-          #    failIfCoverageEmpty: false
-          #  displayName: 'Publicar resultados de code coverage del back-end'
+          - task: PublishCodeCoverageResults@2
+            inputs:
+              summaryFileLocation: '$(Agent.TempDirectory)/**/*.cobertura.xml'
+              failIfCoverageEmpty: false
+            displayName: 'Publicar resultados de code coverage del back-end'
 
           # Compilar la solución del back-end
           - task: DotNetCoreCLI@2
@@ -207,27 +207,27 @@
           #      sonar.projectBaseDir=$(Build.SourcesDirectory)/EmployeeCrudAngular
 
           # Ejecutar pruebas del front-end
-          #- script: npx ng test --karma-config=karma.conf.js --watch=false --browsers ChromeHeadless --code-coverage
-          #  displayName: 'Ejecutar pruebas del front'
-          #  workingDirectory: $(System.DefaultWorkingDirectory)/EmployeeCrudAngular
-          #  continueOnError: true
+          - script: npx ng test --karma-config=karma.conf.js --watch=false --browsers ChromeHeadless --code-coverage
+            displayName: 'Ejecutar pruebas del front'
+            workingDirectory: $(System.DefaultWorkingDirectory)/EmployeeCrudAngular
+            continueOnError: true
 
           # Publicación de resultados de cobertura de código del frontend
-          #- task: PublishCodeCoverageResults@2
-          #  inputs:
-          #    summaryFileLocation: '$(System.DefaultWorkingDirectory)/EmployeeCrudAngular/coverage/lcov.info'
-          #    failIfCoverageEmpty: false
-          #  condition: always()
-          #  displayName: 'Publicar resultados de code coverage del front'
+          - task: PublishCodeCoverageResults@2
+            inputs:
+              summaryFileLocation: '$(System.DefaultWorkingDirectory)/EmployeeCrudAngular/coverage/lcov.info'
+              failIfCoverageEmpty: false
+            condition: always()
+            displayName: 'Publicar resultados de code coverage del front'
 
           # Publicación de resultados de pruebas unitarias del frontend
-          #- task: PublishTestResults@2
-          #  inputs:
-          #    testResultsFormat: 'JUnit'
-          #    testResultsFiles: '$(System.DefaultWorkingDirectory)/EmployeeCrudAngular/test-results/test-results.xml'
-          #    failTaskOnFailedTests: true
-          #  condition: always()
-          #  displayName: 'Publicar resultados de pruebas unitarias del front'
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '$(System.DefaultWorkingDirectory)/EmployeeCrudAngular/test-results/test-results.xml'
+              failTaskOnFailedTests: true
+            condition: always()
+            displayName: 'Publicar resultados de pruebas unitarias del front'
 
           # Compilar el front-end
           - script: npx ng build --configuration production

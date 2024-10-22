@@ -94,7 +94,7 @@
 - ![alt text](imagenes/19.png)
 - ![alt text](imagenes/20.png)
 - ![alt text](imagenes/21.png)
-- 
+- ![alt text](imagenes/22.png)
 
 - 4.2.5 Entregar un pipeline que incluya:
   - A) Etapa Construcción y Pruebas Unitarias y Code Coverage Back y Front
