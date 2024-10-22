@@ -690,6 +690,8 @@
         displayName: 'Tests de Integracion'
         dependsOn:
           - DeployQA
+        variables:
+         baseUrl: '$(ACI-Base-URL)'
         steps:
           - task: CmdLine@2
             displayName: 'Instalar TypeScript'
