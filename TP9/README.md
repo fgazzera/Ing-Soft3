@@ -98,14 +98,35 @@
 
 - 4.2.5 Entregar un pipeline que incluya:
   - A) Etapa Construcción y Pruebas Unitarias y Code Coverage Back y Front
+  - ![alt text](imagenes/23.png)
+
   - B) Construcción de Imágenes Docker y subida a ACR
+  - ![alt text](imagenes/24.png)
+
   - C) Deploy Back y Front en QA con pruebas de integración para Azure Web Apps
+  - ![alt text](imagenes/25.png)
+  - ![alt text](imagenes/26.png)
+  - ![alt text](imagenes/27.png)
+
   - D) Deploy Back y Front en QA con pruebas de integración para ACI
+  - ![alt text](imagenes/28.png)
+  - ![alt text](imagenes/29.png)
+  - ![alt text](imagenes/30.png)
+  - ![alt text](imagenes/31.png)
+  - ![alt text](imagenes/32.png)
+
   - E) Deploy Back y Front en QA con pruebas de integración para Azure Web Apps con Soporte para contenedores
+  - ![alt text](imagenes/33.png)
+
   - F) Aprobación manual de QA para los puntos C,D,E
   - G) Deploy Back y Front en PROD para Azure Web Apps
+  - ![alt text](imagenes/34.png)
+
   - H) Deploy Back y Front en PROD para ACI
+  - ![alt text](imagenes/35.png)
+
   - I) Deploy Back y Front en PROD para Azure Web Apps con Soporte para contenedores
+  - ![alt text](imagenes/36.png)
 
 - Pipeline Completo: (Link: https://dev.azure.com/fgazzera/Sample02/_build/results?buildId=199&view=results)
 - ![alt text](imagenes/00.png)
